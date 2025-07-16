@@ -1,0 +1,122 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidEmail() {
+      return isAuthenticated() && 
+             request.auth.token.email.matches('.*@hangnadim\\.com$');
+    }
+    
+    // Users collection - Role-based access
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAdmin() && isValidEmail(); // Only admin can create users
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // Employees collection - Admins can do everything, users can read only
+    match /employees/{employeeId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // HCIS Pusat Informasi collection - Core feature of your app
+    match /informasi/{infoId} {
+      allow read: if isAuthenticated(); // All authenticated users can read
+      allow create: if isAdmin(); // Only admin can create new information
+      allow update: if isAdmin() || 
+                      (isAuthenticated() && 
+                       request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['komentar'])); // Users can only add comments
+      allow delete: if isAdmin();
+    }
+    
+    // Company info collection (if you add this feature later)
+    match /company_info/{infoId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Feedback collection - Users can create and read their own, admins can read all
+    match /feedback/{feedbackId} {
+      allow read: if isAuthenticated() && 
+                    (isAdmin() || resource.data.submittedBy == request.auth.uid);
+      allow create: if isAuthenticated() && 
+                      request.resource.data.submittedBy == request.auth.uid &&
+                      isValidEmail();
+      allow update: if isAdmin();
+      allow delete: if isAdmin() || 
+                      (isAuthenticated() && resource.data.submittedBy == request.auth.uid);
+    }
+    
+    // Departments collection - Read for all authenticated users, write for admins only
+    match /departments/{departmentId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Positions collection - Read for all authenticated users, write for admins only
+    match /positions/{positionId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // System logs collection (for audit trail)
+    match /system_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // Auto-generated logs
+      allow update, delete: if false; // Logs should be immutable
+    }
+    
+    // Settings collection (for app configuration)
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Notifications collection (if you add this feature)
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && 
+                    (isAdmin() || resource.data.targetUsers.hasAny([request.auth.uid]));
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Analytics collection (for dashboard metrics)
+    match /analytics/{analyticsId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // Auto-generated analytics
+      allow update, delete: if isAdmin();
+    }
+    
+    // File metadata collection (for document management)
+    match /file_metadata/{fileId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidEmail();
+      allow update: if isAdmin() || 
+                      (isAuthenticated() && resource.data.uploadedBy == request.auth.uid);
+      allow delete: if isAdmin() || 
+                      (isAuthenticated() && resource.data.uploadedBy == request.auth.uid);
+    }
+    
+    // Default deny rule for any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
