@@ -1,9 +1,23 @@
+# Robots.txt for HCIS Hang Nadim Airport
 User-agent: *
+
+# Allow public pages
 Allow: /
 Allow: /about
+Allow: /login
+
+# Disallow private/sensitive pages
 Disallow: /dashboard
 Disallow: /admin
 Disallow: /employee
 Disallow: /registration
+Disallow: /pusat-informasi
 
+# Allow search engines to access CSS and JS
+Allow: /static/
+
+# Sitemap location
 Sitemap: https://hcis-hang-nadim.vercel.app/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1
