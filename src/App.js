@@ -5,15 +5,7 @@ import PusatInformasi from "./components/PusatInformasi";
 import Registration from "./components/Registration";
 import DashboardMain from "./components/Dashboard/DashboardMain";
 import { db } from "./services/firebase";
-import {
-  User,
-  Lock,
-  Eye,
-  EyeOff,
-  LogIn,
-  Shield,
-  UserCheck,
-} from "lucide-react";
+import {User,Lock,Eye,EyeOff,LogIn,Shield,UserCheck,} from "lucide-react";
 import "./App.css";
 
 // ===== MODULE COMPONENTS =====
