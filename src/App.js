@@ -1,4 +1,4 @@
-// App.js - FINAL OPTIMIZED VERSION
+// App.js - FINAL RENOVATED VERSION - All Functions Preserved
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import PusatInformasi from "./components/PusatInformasi";
@@ -13,10 +13,12 @@ import {
   LogIn,
   Shield,
   UserCheck,
+  Menu,
+  X
 } from "lucide-react";
 import "./App.css";
 
-// ===== MODULE COMPONENTS =====
+// ===== MODULE COMPONENTS (ALL PRESERVED) =====
 const ProfileModule = () => (
   <div className="dashboard-module">
     <h1 className="module-title">👤 Profil Saya</h1>
@@ -116,7 +118,7 @@ const SettingsModule = () => (
   </div>
 );
 
-// ===== NAVIGATION COMPONENT =====
+// ===== UNIFIED NAVIGATION COMPONENT - RENOVATED =====
 const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -125,7 +127,7 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
   // Check if current path is dashboard related
   const isDashboardPage = location.pathname.startsWith('/dashboard');
 
-  // Navigation items berdasarkan role untuk sidebar
+  // Navigation items berdasarkan role untuk sidebar (ALL PRESERVED)
   const sidebarItems = {
     employee: [
       { icon: '🏠', label: 'Dashboard', path: '/dashboard' },
@@ -155,7 +157,7 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
 
   const navItems = sidebarItems[userRole] || sidebarItems.employee;
 
-  // Check if current path is active
+  // Check if current path is active (ALL PRESERVED)
   const isActivePath = (path) => {
     if (path === '/dashboard') {
       return location.pathname === '/dashboard';
@@ -163,13 +165,30 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
     return location.pathname.startsWith(path);
   };
 
+  // RENOVATED: Auto-close sidebar on route change
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
   return (
     <>
-      {/* TOP NAVIGATION */}
+      {/* TOP NAVIGATION - RENOVATED BUT ALL FUNCTIONS PRESERVED */}
       <div className="nav-header">
         <div className="nav-content">
-          {/* Logo Section */}
+          {/* Logo Section with RENOVATED hamburger placement */}
           <div className="logo-section">
+            {/* RENOVATED: Hamburger Menu - Always visible when authenticated */}
+            {isAuthenticated && (
+              <button
+                className="mobile-menu-button"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                style={{ marginRight: '15px' }}
+                title="Open Menu"
+              >
+                <Menu size={20} />
+              </button>
+            )}
+            
             <div className="logo-text">
               H<span className="logo-plane">✈</span>NGNADIM
             </div>
@@ -180,20 +199,8 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
             </div>
           </div>
 
-          {/* Navigation Menu */}
+          {/* Navigation Menu - ALL PRESERVED */}
           <div className="nav-menu">
-            {/* Mobile menu button - only show on dashboard pages */}
-            {isDashboardPage && (
-              <button
-                className="mobile-menu-button"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              >
-                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            )}
-
             <button
               onClick={() => navigate('/')}
               className={`nav-button ${location.pathname === '/' ? 'active' : ''}`}
@@ -248,8 +255,8 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
         </div>
       </div>
 
-      {/* SIDEBAR - Only show on dashboard pages */}
-      {isDashboardPage && isAuthenticated && (
+      {/* SIDEBAR - RENOVATED TO ALWAYS BE POPUP - Only show when authenticated */}
+      {isAuthenticated && (
         <>
           {/* Sidebar */}
           <div className={`dashboard-sidebar ${isSidebarOpen ? 'sidebar-open' : ''}`}>
@@ -258,10 +265,9 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
               <button
                 className="sidebar-close"
                 onClick={() => setIsSidebarOpen(false)}
+                title="Close Menu"
               >
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X size={18} />
               </button>
             </div>
 
@@ -304,7 +310,7 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
             </div>
           </div>
 
-          {/* Sidebar Overlay */}
+          {/* Sidebar Overlay - RENOVATED with blur effect */}
           {isSidebarOpen && (
             <div 
               className="sidebar-overlay"
@@ -317,7 +323,7 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
   );
 };
 
-// ===== LOGIN PAGE COMPONENT =====
+// ===== LOGIN PAGE COMPONENT - ALL PRESERVED =====
 const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, setShowPassword, fillDemoCredentials }) => {
   const navigate = useNavigate();
 
@@ -477,7 +483,7 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
   );
 };
 
-// ===== MAIN APP COMPONENT =====
+// ===== MAIN APP COMPONENT - ALL LOGIC PRESERVED =====
 const App = () => {
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -490,7 +496,7 @@ const App = () => {
   const [userEmail, setUserEmail] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize authentication state
+  // Initialize authentication state - ALL PRESERVED
   useEffect(() => {
     // DEVELOPMENT: Auto clear localStorage on every reload
     if (process.env.NODE_ENV === 'development') {
@@ -571,7 +577,7 @@ const App = () => {
     }
   };
 
-  // Protected Route Component
+  // Protected Route Component - ALL PRESERVED
   const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
       console.log('🚫 Protected route accessed without authentication, redirecting to login');
@@ -580,7 +586,7 @@ const App = () => {
     return children;
   };
 
-  // Employee Page Component
+  // Employee Page Component - ALL PRESERVED
   const EmployeePage = () => (
     <div className="dashboard-content">
       <div className="dashboard-module">
@@ -598,7 +604,7 @@ const App = () => {
   return (
     <Router>
       <div className="App">
-        {/* UNIFIED NAVIGATION */}
+        {/* UNIFIED NAVIGATION - RENOVATED */}
         <UnifiedNavigation 
           userRole={userRole}
           userEmail={userEmail}
@@ -608,7 +614,7 @@ const App = () => {
 
         <div className="main-content">
           <Routes>
-            {/* Public Routes */}
+            {/* Public Routes - ALL PRESERVED */}
             <Route 
               path="/" 
               element={
@@ -643,7 +649,7 @@ const App = () => {
               } 
             />
             
-            {/* Protected Routes */}
+            {/* Protected Routes - ALL PRESERVED */}
             <Route 
               path="/dashboard" 
               element={
@@ -653,7 +659,7 @@ const App = () => {
               } 
             />
             
-            {/* Dashboard Module Routes */}
+            {/* Dashboard Module Routes - ALL PRESERVED */}
             <Route path="/dashboard/profile" element={<ProtectedRoute><ProfileModule /></ProtectedRoute>} />
             <Route path="/dashboard/attendance" element={<ProtectedRoute><AttendanceModule /></ProtectedRoute>} />
             <Route path="/dashboard/leave" element={<ProtectedRoute><LeaveModule /></ProtectedRoute>} />
@@ -663,7 +669,7 @@ const App = () => {
             <Route path="/dashboard/communication" element={<ProtectedRoute><CommunicationModule /></ProtectedRoute>} />
             <Route path="/dashboard/documents" element={<ProtectedRoute><DocumentsModule /></ProtectedRoute>} />
             
-            {/* Admin Routes */}
+            {/* Admin Routes - ALL PRESERVED */}
             <Route 
               path="/dashboard/admin/employees" 
               element={
@@ -689,7 +695,7 @@ const App = () => {
               } 
             />
             
-            {/* Application Routes */}
+            {/* Application Routes - ALL PRESERVED */}
             <Route 
               path="/pusat-informasi" 
               element={
@@ -719,7 +725,7 @@ const App = () => {
               } 
             />
             
-            {/* Redirect any unknown routes to home */}
+            {/* Redirect any unknown routes to home - ALL PRESERVED */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

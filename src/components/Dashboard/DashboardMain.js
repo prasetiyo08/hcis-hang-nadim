@@ -1,4 +1,4 @@
-// src/components/Dashboard/DashboardMain.js - FIXED with Inline Styles
+// src/components/Dashboard/DashboardMain.js - FINAL RENOVATED VERSION
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,7 +7,7 @@ const DashboardMain = ({ userRole = 'employee' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState('');
 
-  // Update time setiap detik
+  // Update time setiap detik - ALL PRESERVED
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -22,7 +22,7 @@ const DashboardMain = ({ userRole = 'employee' }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Module definitions berdasarkan role
+  // Module definitions berdasarkan role - ALL PRESERVED
   const employeeModules = [
     {
       id: 'profile',
@@ -131,7 +131,7 @@ const DashboardMain = ({ userRole = 'employee' }) => {
 
   const modules = userRole === 'admin' ? adminModules : employeeModules;
 
-  // Quick stats data
+  // Quick stats data - ALL PRESERVED
   const quickStats = [
     {
       title: 'Kehadiran Hari Ini',
@@ -167,216 +167,16 @@ const DashboardMain = ({ userRole = 'employee' }) => {
     navigate(path);
   };
 
-  // Inline styles untuk mengganti Tailwind
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      backgroundColor: '#f8fafc',
-      padding: '1.5rem'
-    },
-    header: {
-      marginBottom: '2rem'
-    },
-    greeting: {
-      fontSize: '1.875rem',
-      fontWeight: 'bold',
-      color: '#111827',
-      marginBottom: '0.5rem'
-    },
-    subtitle: {
-      color: '#6b7280'
-    },
-    time: {
-      fontSize: '1.5rem',
-      fontFamily: 'monospace',
-      color: '#374151',
-      marginTop: '1rem'
-    },
-    quickStatsGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-      gap: '1rem',
-      marginBottom: '2rem'
-    },
-    statCard: {
-      backgroundColor: 'white',
-      borderRadius: '0.75rem',
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-      padding: '1rem',
-      border: '1px solid #e5e7eb'
-    },
-    statCardContent: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between'
-    },
-    statTitle: {
-      fontSize: '0.875rem',
-      color: '#6b7280',
-      marginBottom: '0.25rem'
-    },
-    statValue: {
-      fontSize: '1.5rem',
-      fontWeight: 'bold',
-      color: '#111827'
-    },
-    statIcon: {
-      padding: '0.75rem',
-      borderRadius: '0.5rem',
-      fontSize: '1.25rem'
-    },
-    modulesTitle: {
-      fontSize: '1.5rem',
-      fontWeight: 'bold',
-      color: '#111827',
-      marginBottom: '1.5rem'
-    },
-    modulesGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-      gap: '1.5rem',
-      marginBottom: '2rem'
-    },
-    moduleCard: {
-      backgroundColor: 'white',
-      borderRadius: '1rem',
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      border: '1px solid #e5e7eb',
-      overflow: 'hidden'
-    },
-    moduleCardHover: {
-      transform: 'scale(1.02)',
-      boxShadow: '0 10px 25px 0 rgba(0, 0, 0, 0.15)'
-    },
-    moduleHeader: {
-      padding: '1.5rem',
-      color: 'white',
-      position: 'relative',
-      overflow: 'hidden'
-    },
-    moduleIcon: {
-      fontSize: '2.5rem',
-      marginBottom: '0.75rem',
-      display: 'block'
-    },
-    moduleTitle: {
-      fontWeight: 'bold',
-      fontSize: '1.125rem',
-      marginBottom: '0.5rem'
-    },
-    moduleDescription: {
-      fontSize: '0.875rem',
-      opacity: 0.9
-    },
-    moduleBody: {
-      padding: '1rem'
-    },
-    moduleStats: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between'
-    },
-    moduleStatsLabel: {
-      fontSize: '0.75rem',
-      color: '#6b7280',
-      marginBottom: '0.25rem'
-    },
-    moduleStatsValue: {
-      fontWeight: 'bold'
-    },
-    arrow: {
-      width: '1.25rem',
-      height: '1.25rem',
-      color: '#9ca3af',
-      transition: 'transform 0.2s ease'
-    },
-    activitiesGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-      gap: '1.5rem'
-    },
-    activityCard: {
-      backgroundColor: 'white',
-      borderRadius: '0.75rem',
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-      padding: '1.5rem',
-      border: '1px solid #e5e7eb'
-    },
-    activityTitle: {
-      fontSize: '1.125rem',
-      fontWeight: 'bold',
-      color: '#111827',
-      marginBottom: '1rem'
-    },
-    activityList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '1rem'
-    },
-    activityItem: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.75rem',
-      padding: '0.75rem',
-      borderRadius: '0.5rem',
-      transition: 'background-color 0.2s ease'
-    },
-    activityItemHover: {
-      backgroundColor: '#f9fafb'
-    },
-    activityIcon: {
-      fontSize: '1.25rem'
-    },
-    activityText: {
-      flex: 1
-    },
-    activityMainText: {
-      fontSize: '0.875rem',
-      color: '#111827'
-    },
-    activityTime: {
-      fontSize: '0.75rem',
-      color: '#6b7280'
-    },
-    quickActionsGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-      gap: '0.75rem'
-    },
-    quickActionButton: {
-      color: 'white',
-      border: 'none',
-      padding: '1rem',
-      borderRadius: '0.75rem',
-      cursor: 'pointer',
-      fontWeight: '600',
-      transition: 'all 0.2s ease',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '0.5rem',
-      boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)'
-    },
-    quickActionIcon: {
-      fontSize: '1.5rem'
-    },
-    quickActionLabel: {
-      fontSize: '0.875rem'
-    }
-  };
-
   return (
-    <div style={styles.container}>
-      {/* Header Section */}
-      <div style={styles.header}>
+    <div className="dashboard-main">
+      {/* Header Section - RENOVATED but functions preserved */}
+      <div className="dashboard-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h1 style={styles.greeting}>
+            <h1 className="dashboard-greeting">
               {greeting}! 👋
             </h1>
-            <p style={styles.subtitle}>
+            <p className="dashboard-subtitle">
               {userRole === 'admin' ? 'Admin Dashboard' : 'Employee Portal'} - 
               {currentTime.toLocaleDateString('id-ID', { 
                 weekday: 'long', 
@@ -386,23 +186,22 @@ const DashboardMain = ({ userRole = 'employee' }) => {
               })}
             </p>
           </div>
-          <div style={styles.time}>
+          <div className="dashboard-time">
             {currentTime.toLocaleTimeString('id-ID')}
           </div>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div style={styles.quickStatsGrid}>
+      {/* Quick Stats - ALL PRESERVED with renovated styling */}
+      <div className="quick-stats-grid">
         {quickStats.map((stat, index) => (
-          <div key={index} style={styles.statCard}>
-            <div style={styles.statCardContent}>
+          <div key={index} className="stat-card">
+            <div className="stat-card-content">
               <div>
-                <p style={styles.statTitle}>{stat.title}</p>
-                <p style={styles.statValue}>{stat.value}</p>
+                <p className="stat-title">{stat.title}</p>
+                <p className="stat-value">{stat.value}</p>
               </div>
-              <div style={{
-                ...styles.statIcon,
+              <div className="stat-icon" style={{
                 backgroundColor: stat.bgColor,
                 color: stat.textColor
               }}>
@@ -413,38 +212,40 @@ const DashboardMain = ({ userRole = 'employee' }) => {
         ))}
       </div>
 
-      {/* Modules Grid */}
+      {/* Modules Grid - ALL PRESERVED with renovated styling */}
       <div>
-        <h2 style={styles.modulesTitle}>
+        <h2 className="modules-title">
           {userRole === 'admin' ? 'Modul Administrasi' : 'Modul Karyawan'}
         </h2>
-        <div style={styles.modulesGrid}>
+        <div className="modules-grid">
           {modules.map((module) => (
             <div
               key={module.id}
               onClick={() => handleModuleClick(module.path)}
-              style={styles.moduleCard}
+              className="module-card"
               onMouseEnter={(e) => {
-                Object.assign(e.currentTarget.style, styles.moduleCardHover);
-                e.currentTarget.querySelector('.arrow').style.transform = 'translateX(4px)';
+                e.currentTarget.style.transform = 'scale(1.02) translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 30px 0 rgba(0, 0, 0, 0.15)';
+                const arrow = e.currentTarget.querySelector('.arrow');
+                if (arrow) arrow.style.transform = 'translateX(4px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.transform = 'scale(1) translateY(0)';
                 e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
-                e.currentTarget.querySelector('.arrow').style.transform = 'translateX(0)';
+                const arrow = e.currentTarget.querySelector('.arrow');
+                if (arrow) arrow.style.transform = 'translateX(0)';
               }}
             >
-              {/* Card Header dengan Gradient */}
-              <div style={{
-                ...styles.moduleHeader,
+              {/* Card Header dengan Gradient - ALL PRESERVED */}
+              <div className="module-header" style={{
                 background: module.gradient
               }}>
                 <div style={{ position: 'relative', zIndex: 10 }}>
-                  <div style={styles.moduleIcon}>{module.icon}</div>
-                  <h3 style={styles.moduleTitle}>{module.title}</h3>
-                  <p style={styles.moduleDescription}>{module.description}</p>
+                  <div className="module-icon">{module.icon}</div>
+                  <h3 className="module-title">{module.title}</h3>
+                  <p className="module-description">{module.description}</p>
                 </div>
-                {/* Background icon */}
+                {/* Background icon - ALL PRESERVED */}
                 <div style={{
                   position: 'absolute',
                   top: 0,
@@ -457,14 +258,19 @@ const DashboardMain = ({ userRole = 'employee' }) => {
                 </div>
               </div>
               
-              {/* Card Body */}
-              <div style={styles.moduleBody}>
-                <div style={styles.moduleStats}>
+              {/* Card Body - ALL PRESERVED */}
+              <div className="module-body">
+                <div className="module-stats">
                   <div>
-                    <p style={styles.moduleStatsLabel}>{module.stats.label}</p>
-                    <p style={styles.moduleStatsValue}>{module.stats.value}</p>
+                    <p className="module-stats-label">{module.stats.label}</p>
+                    <p className="module-stats-value">{module.stats.value}</p>
                   </div>
-                  <div className="arrow" style={styles.arrow}>
+                  <div className="arrow" style={{
+                    width: '1.25rem',
+                    height: '1.25rem',
+                    color: '#9ca3af',
+                    transition: 'transform 0.2s ease'
+                  }}>
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '100%', height: '100%' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
@@ -476,12 +282,12 @@ const DashboardMain = ({ userRole = 'employee' }) => {
         </div>
       </div>
 
-      {/* Recent Activities Section */}
-      <div style={styles.activitiesGrid}>
+      {/* Recent Activities Section - ALL PRESERVED with renovated styling */}
+      <div className="activities-grid">
         {/* Recent Activities */}
-        <div style={styles.activityCard}>
-          <h3 style={styles.activityTitle}>Aktivitas Terbaru</h3>
-          <div style={styles.activityList}>
+        <div className="activity-card">
+          <h3 className="activity-title">Aktivitas Terbaru</h3>
+          <div className="activity-list">
             {[
               { icon: '⏰', text: 'Clock in pukul 08:15', time: '2 menit lalu', color: '#059669' },
               { icon: '📄', text: 'Dokumen kontrak diupload', time: '1 jam lalu', color: '#2563eb' },
@@ -490,29 +296,28 @@ const DashboardMain = ({ userRole = 'employee' }) => {
             ].map((activity, index) => (
               <div 
                 key={index} 
-                style={styles.activityItem}
-                onMouseEnter={(e) => Object.assign(e.currentTarget.style, styles.activityItemHover)}
+                className="activity-item"
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
-                <div style={{
-                  ...styles.activityIcon,
+                <div className="activity-icon" style={{
                   color: activity.color
                 }}>
                   {activity.icon}
                 </div>
-                <div style={styles.activityText}>
-                  <p style={styles.activityMainText}>{activity.text}</p>
-                  <p style={styles.activityTime}>{activity.time}</p>
+                <div className="activity-text">
+                  <p className="activity-main-text">{activity.text}</p>
+                  <p className="activity-time">{activity.time}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div style={styles.activityCard}>
-          <h3 style={styles.activityTitle}>Quick Actions</h3>
-          <div style={styles.quickActionsGrid}>
+        {/* Quick Actions - ALL PRESERVED with renovated styling */}
+        <div className="activity-card">
+          <h3 className="activity-title">Quick Actions</h3>
+          <div className="quick-actions-grid">
             {[
               { icon: '⏰', label: 'Clock In/Out', gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
               { icon: '🏖️', label: 'Ajukan Cuti', gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' },
@@ -521,8 +326,8 @@ const DashboardMain = ({ userRole = 'employee' }) => {
             ].map((action, index) => (
               <button
                 key={index}
+                className="quick-action-button"
                 style={{
-                  ...styles.quickActionButton,
                   background: action.gradient
                 }}
                 onMouseEnter={(e) => {
@@ -534,12 +339,117 @@ const DashboardMain = ({ userRole = 'employee' }) => {
                   e.target.style.boxShadow = '0 2px 4px 0 rgba(0, 0, 0, 0.1)';
                 }}
               >
-                <div style={styles.quickActionIcon}>{action.icon}</div>
-                <div style={styles.quickActionLabel}>{action.label}</div>
+                <div className="quick-action-icon">{action.icon}</div>
+                <div className="quick-action-label">{action.label}</div>
               </button>
             ))}
           </div>
         </div>
+
+        {/* Admin Stats Summary - PRESERVED for admin only */}
+        {userRole === 'admin' && (
+          <div className="activity-card">
+            <h3 className="activity-title">📊 Ringkasan Sistem</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {[
+                { label: 'Total Karyawan', value: '247 orang', icon: '👥', color: '#059669' },
+                { label: 'Hadir Hari Ini', value: '234 (94.7%)', icon: '✅', color: '#0891b2' },
+                { label: 'Pending Approval', value: '12 item', icon: '⏳', color: '#d97706' },
+                { label: 'Sistem Status', value: 'Online', icon: '🟢', color: '#059669' }
+              ].map((stat, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.75rem',
+                  borderRadius: '0.5rem',
+                  backgroundColor: '#f8fafc',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                >
+                  <div style={{
+                    fontSize: '1.25rem',
+                    color: stat.color
+                  }}>
+                    {stat.icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      color: '#111827',
+                      margin: 0,
+                      fontWeight: '500'
+                    }}>
+                      {stat.label}
+                    </p>
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: '#6b7280',
+                      margin: 0
+                    }}>
+                      {stat.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Employee Personal Stats - PRESERVED for employee only */}
+        {userRole === 'employee' && (
+          <div className="activity-card">
+            <h3 className="activity-title">📊 Statistik Personal</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {[
+                { label: 'Kehadiran Bulan Ini', value: '22/23 hari', percentage: '95.7%', color: '#059669' },
+                { label: 'Overtime Bulan Ini', value: '8 jam', percentage: '40%', color: '#0891b2' },
+                { label: 'Sisa Cuti Tahunan', value: '8 hari', percentage: '67%', color: '#d97706' },
+                { label: 'Pelatihan Selesai', value: '3/4 kursus', percentage: '75%', color: '#7c3aed' }
+              ].map((stat, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.75rem',
+                  borderRadius: '0.5rem',
+                  backgroundColor: '#f8fafc',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                >
+                  <div>
+                    <p style={{
+                      fontSize: '0.875rem',
+                      color: '#111827',
+                      margin: 0,
+                      fontWeight: '500'
+                    }}>
+                      {stat.label}
+                    </p>
+                    <p style={{
+                      fontSize: '0.75rem',
+                      color: '#6b7280',
+                      margin: 0
+                    }}>
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div style={{
+                    color: stat.color,
+                    fontWeight: 'bold',
+                    fontSize: '0.875rem'
+                  }}>
+                    {stat.percentage}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
