@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocat
 import PusatInformasi from "./components/PusatInformasi";
 import Registration from "./components/Registration";
 import DashboardMain from "./components/Dashboard/DashboardMain";
-import { db } from "./services/firebase";
 import {
   User,
   Lock,
