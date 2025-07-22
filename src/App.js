@@ -1,9 +1,17 @@
 // App.js - FINAL RENOVATED VERSION - All Functions Preserved
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import PusatInformasi from "./components/PusatInformasi";
 import Registration from "./components/Registration";
 import DashboardMain from "./components/Dashboard/DashboardMain";
+import ProfilePage from "./components/Profile/ProfilePage"; // ADD THIS IMPORT
 import { db } from "./services/firebase";
 import {
   User,
@@ -14,29 +22,23 @@ import {
   Shield,
   UserCheck,
   Menu,
-  X
+  X,
 } from "lucide-react";
 import "./App.css";
+import AttendancePage from "./components/Attendance/AttendancePage";
 
 // ===== MODULE COMPONENTS (ALL PRESERVED) =====
 const ProfileModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">👤 Profil Saya</h1>
-    <div className="module-content">
-      <p>Module Profil - Coming Soon!</p>
-    </div>
+  <div className="dashboard-content">
+    <ProfilePage />
   </div>
 );
 
 const AttendanceModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">⏰ Absensi</h1>
-    <div className="module-content">
-      <p>Module Absensi - Coming Soon!</p>
-    </div>
+  <div className="dashboard-content">
+    <AttendancePage />
   </div>
 );
-
 const LeaveModule = () => (
   <div className="dashboard-module">
     <h1 className="module-title">🏖️ Cuti & Izin</h1>
@@ -119,48 +121,65 @@ const SettingsModule = () => (
 );
 
 // ===== UNIFIED NAVIGATION COMPONENT - RENOVATED =====
-const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) => {
+const UnifiedNavigation = ({
+  userRole,
+  userEmail,
+  isAuthenticated,
+  onLogout,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Check if current path is dashboard related
-  const isDashboardPage = location.pathname.startsWith('/dashboard');
+  const isDashboardPage = location.pathname.startsWith("/dashboard");
 
-  // Navigation items berdasarkan role untuk sidebar (ALL PRESERVED)
+  // Navigation items berdasarkan role untuk sidebar - UPDATED WITH 2-COLOR ICONS
   const sidebarItems = {
     employee: [
-      { icon: '🏠', label: 'Dashboard', path: '/dashboard' },
-      { icon: '👤', label: 'Profil Saya', path: '/dashboard/profile' },
-      { icon: '⏰', label: 'Absensi', path: '/dashboard/attendance' },
-      { icon: '🏖️', label: 'Cuti & Izin', path: '/dashboard/leave' },
-      { icon: '💰', label: 'Penggajian', path: '/dashboard/payroll' },
-      { icon: '📈', label: 'Penilaian Kinerja', path: '/dashboard/performance' },
-      { icon: '🎓', label: 'Pelatihan', path: '/dashboard/training' },
-      { icon: '💬', label: 'Komunikasi', path: '/dashboard/communication' },
-      { icon: '📄', label: 'Dokumen', path: '/dashboard/documents' }
+      { icon: "🔵🏠", label: "Dashboard", path: "/dashboard" },
+      { icon: "🔵👤", label: "Profil Saya", path: "/dashboard/profile" },
+      { icon: "🔵⏰", label: "Absensi", path: "/dashboard/attendance" },
+      { icon: "🔵🏖️", label: "Cuti & Izin", path: "/dashboard/leave" },
+      { icon: "🔵💰", label: "Penggajian", path: "/dashboard/payroll" },
+      {
+        icon: "🔵📈",
+        label: "Penilaian Kinerja",
+        path: "/dashboard/performance",
+      },
+      { icon: "🔵🎓", label: "Pelatihan", path: "/dashboard/training" },
+      { icon: "🔵💬", label: "Komunikasi", path: "/dashboard/communication" },
+      { icon: "🔵📄", label: "Dokumen", path: "/dashboard/documents" },
     ],
     admin: [
-      { icon: '🏠', label: 'Dashboard', path: '/dashboard' },
-      { icon: '👥', label: 'Manajemen Karyawan', path: '/dashboard/admin/employees' },
-      { icon: '⏰', label: 'Absensi', path: '/dashboard/attendance' },
-      { icon: '🏖️', label: 'Cuti & Izin', path: '/dashboard/leave' },
-      { icon: '💰', label: 'Penggajian', path: '/dashboard/payroll' },
-      { icon: '📈', label: 'Penilaian Kinerja', path: '/dashboard/performance' },
-      { icon: '🎓', label: 'Pelatihan', path: '/dashboard/training' },
-      { icon: '💬', label: 'Komunikasi', path: '/dashboard/communication' },
-      { icon: '📄', label: 'Dokumen', path: '/dashboard/documents' },
-      { icon: '📊', label: 'Analytics', path: '/dashboard/admin/analytics' },
-      { icon: '⚙️', label: 'Settings', path: '/dashboard/admin/settings' }
-    ]
+      { icon: "🔵🏠", label: "Dashboard", path: "/dashboard" },
+      {
+        icon: "🔵👥",
+        label: "Manajemen Karyawan",
+        path: "/dashboard/admin/employees",
+      },
+      { icon: "🔵⏰", label: "Absensi", path: "/dashboard/attendance" },
+      { icon: "🔵🏖️", label: "Cuti & Izin", path: "/dashboard/leave" },
+      { icon: "🔵💰", label: "Penggajian", path: "/dashboard/payroll" },
+      {
+        icon: "🔵📈",
+        label: "Penilaian Kinerja",
+        path: "/dashboard/performance",
+      },
+      { icon: "🔵🎓", label: "Pelatihan", path: "/dashboard/training" },
+      { icon: "🔵💬", label: "Komunikasi", path: "/dashboard/communication" },
+      { icon: "🔵📄", label: "Dokumen", path: "/dashboard/documents" },
+      { icon: "🔵📊", label: "Analytics", path: "/dashboard/admin/analytics" },
+      { icon: "🔵⚙️", label: "Settings", path: "/dashboard/admin/settings" },
+    ],
   };
 
   const navItems = sidebarItems[userRole] || sidebarItems.employee;
 
   // Check if current path is active (ALL PRESERVED)
   const isActivePath = (path) => {
-    if (path === '/dashboard') {
-      return location.pathname === '/dashboard';
+    if (path === "/dashboard") {
+      return location.pathname === "/dashboard";
     }
     return location.pathname.startsWith(path);
   };
@@ -182,59 +201,60 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
               <button
                 className="mobile-menu-button"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                style={{ marginRight: '15px' }}
+                style={{ marginRight: "15px" }}
                 title="Open Menu"
               >
                 <Menu size={20} />
               </button>
             )}
-            
+
             <div className="logo-text">
               H<span className="logo-plane">✈</span>NGNADIM
             </div>
             <div className="logo-subtitle">
-              BANDARA<br />
-              INTERNASIONAL<br />
+              BANDARA
+              <br />
+              INTERNASIONAL
+              <br />
               BATAM
             </div>
           </div>
 
-          {/* Navigation Menu - ALL PRESERVED */}
+          {/* Navigation Menu - BERANDA BUTTON REMOVED */}
           <div className="nav-menu">
-            <button
-              onClick={() => navigate('/')}
-              className={`nav-button ${location.pathname === '/' ? 'active' : ''}`}
-            >
-              Beranda
-            </button>
-
             {isAuthenticated && (
               <>
                 <button
-                  onClick={() => navigate('/dashboard')}
-                  className={`nav-button ${isDashboardPage ? 'active' : ''}`}
+                  onClick={() => navigate("/dashboard")}
+                  className={`nav-button ${isDashboardPage ? "active" : ""}`}
                 >
                   Dashboard
                 </button>
 
                 <button
-                  onClick={() => navigate('/pusat-informasi')}
-                  className={`nav-button ${location.pathname === '/pusat-informasi' ? 'active' : ''}`}
+                  onClick={() => navigate("/pusat-informasi")}
+                  className={`nav-button ${
+                    location.pathname === "/pusat-informasi" ? "active" : ""
+                  }`}
                 >
                   Pusat Informasi
                 </button>
 
                 <button
-                  onClick={() => navigate('/employee')}
-                  className={`nav-button ${location.pathname === '/employee' ? 'active' : ''}`}
+                  onClick={() => navigate("/employee")}
+                  className={`nav-button ${
+                    location.pathname === "/employee" ? "active" : ""
+                  }`}
                 >
                   Employee
                 </button>
 
-                {userRole === 'admin' && (
+                {userRole === "admin" && (
                   <button
-                    onClick={() => navigate('/registration')}
-                    className={`nav-button ${location.pathname === '/registration' ? 'active' : ''}`}
+                    onClick={() => navigate("/registration")}
+                    className={`nav-button ${
+                      location.pathname === "/registration" ? "active" : ""
+                    }`}
                   >
                     📝 Daftar Pegawai
                   </button>
@@ -247,7 +267,10 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
                 Logout
               </button>
             ) : (
-              <button onClick={() => navigate('/login')} className="nav-button-primary">
+              <button
+                onClick={() => navigate("/login")}
+                className="nav-button-primary"
+              >
                 MASUK
               </button>
             )}
@@ -259,7 +282,11 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
       {isAuthenticated && (
         <>
           {/* Sidebar */}
-          <div className={`dashboard-sidebar ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+          <div
+            className={`dashboard-sidebar ${
+              isSidebarOpen ? "sidebar-open" : ""
+            }`}
+          >
             <div className="sidebar-header">
               <div className="sidebar-title">📊 Dashboard Modules</div>
               <button
@@ -273,14 +300,15 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
 
             <div className="sidebar-user">
               <div className="user-avatar">
-                {userRole === 'admin' ? 'A' : 'E'}
+                {userRole === "admin" ? "A" : "E"}
               </div>
               <div className="user-details">
                 <div className="user-name">
-                  {userEmail || (userRole === 'admin' ? 'Admin User' : 'Employee User')}
+                  {userEmail ||
+                    (userRole === "admin" ? "Admin User" : "Employee User")}
                 </div>
                 <div className="user-role">
-                  {userRole === 'admin' ? 'Administrator' : 'Karyawan'}
+                  {userRole === "admin" ? "Administrator" : "Karyawan"}
                 </div>
               </div>
             </div>
@@ -293,7 +321,9 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
                     navigate(item.path);
                     setIsSidebarOpen(false);
                   }}
-                  className={`sidebar-nav-item ${isActivePath(item.path) ? 'active' : ''}`}
+                  className={`sidebar-nav-item ${
+                    isActivePath(item.path) ? "active" : ""
+                  }`}
                 >
                   <span className="nav-icon">{item.icon}</span>
                   <span className="nav-label">{item.label}</span>
@@ -312,7 +342,7 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
 
           {/* Sidebar Overlay - RENOVATED with blur effect */}
           {isSidebarOpen && (
-            <div 
+            <div
               className="sidebar-overlay"
               onClick={() => setIsSidebarOpen(false)}
             ></div>
@@ -324,17 +354,25 @@ const UnifiedNavigation = ({ userRole, userEmail, isAuthenticated, onLogout }) =
 };
 
 // ===== LOGIN PAGE COMPONENT - ALL PRESERVED =====
-const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, setShowPassword, fillDemoCredentials }) => {
+const LoginPage = ({
+  onLogin,
+  loginForm,
+  setLoginForm,
+  loading,
+  showPassword,
+  setShowPassword,
+  fillDemoCredentials,
+}) => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('🔄 Login form submitted');
-    
+    console.log("🔄 Login form submitted");
+
     const success = await onLogin(e);
     if (success) {
-      console.log('✅ Login successful, navigating to dashboard...');
-      navigate('/dashboard');
+      console.log("✅ Login successful, navigating to dashboard...");
+      navigate("/dashboard");
     }
   };
 
@@ -343,7 +381,9 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
       <div className="login-layout">
         <div className="login-left-content">
           <h1 className="login-title">
-            Human Capital<br />Information System
+            Human Capital
+            <br />
+            Information System
           </h1>
           <p className="login-subtitle">
             HCIS Hang Nadim Airport memberikan kesempatan bagi seluruh insan
@@ -351,9 +391,9 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
           </p>
           <div className="login-buttons">
             <button className="btn-primary">Daftar Sekarang</button>
-            <button 
+            <button
               className="btn-secondary"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate("/dashboard")}
             >
               Lihat Dashboard
             </button>
@@ -361,7 +401,14 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
         </div>
 
         <div className="login-form-container">
-          <div className="logo-text" style={{ fontSize: "2.5rem", textAlign: "center", marginBottom: "20px" }}>
+          <div
+            className="logo-text"
+            style={{
+              fontSize: "2.5rem",
+              textAlign: "center",
+              marginBottom: "20px",
+            }}
+          >
             H<span className="logo-plane">✈</span>NGNADIM
           </div>
 
@@ -373,14 +420,18 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
           <div className="role-selector">
             <button
               onClick={() => setLoginForm({ ...loginForm, role: "user" })}
-              className={`role-button ${loginForm.role === "user" ? "active" : ""}`}
+              className={`role-button ${
+                loginForm.role === "user" ? "active" : ""
+              }`}
             >
               <UserCheck size={18} />
               Employee
             </button>
             <button
               onClick={() => setLoginForm({ ...loginForm, role: "admin" })}
-              className={`role-button ${loginForm.role === "admin" ? "active" : ""}`}
+              className={`role-button ${
+                loginForm.role === "admin" ? "active" : ""
+              }`}
             >
               <Shield size={18} />
               Administrator
@@ -396,7 +447,12 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
                   type="email"
                   name="email"
                   value={loginForm.email}
-                  onChange={(e) => setLoginForm({...loginForm, [e.target.name]: e.target.value})}
+                  onChange={(e) =>
+                    setLoginForm({
+                      ...loginForm,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
                   placeholder="Enter your email"
                   className="form-input"
                   required
@@ -412,7 +468,12 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={loginForm.password}
-                  onChange={(e) => setLoginForm({...loginForm, [e.target.name]: e.target.value})}
+                  onChange={(e) =>
+                    setLoginForm({
+                      ...loginForm,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
                   placeholder="Enter your password"
                   className="form-input password-input"
                   required
@@ -432,7 +493,9 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
                 <input type="checkbox" />
                 Remember me
               </label>
-              <a href="#" className="forgot-link">Forgot Password?</a>
+              <a href="#" className="forgot-link">
+                Forgot Password?
+              </a>
             </div>
 
             <button
@@ -440,7 +503,9 @@ const LoginPage = ({ onLogin, loginForm, setLoginForm, loading, showPassword, se
               disabled={loading}
               className="login-button"
               style={{
-                background: loading ? "#9ca3af" : "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
+                background: loading
+                  ? "#9ca3af"
+                  : "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
                 cursor: loading ? "not-allowed" : "pointer",
               }}
             >
@@ -499,66 +564,74 @@ const App = () => {
   // Initialize authentication state - ALL PRESERVED
   useEffect(() => {
     // DEVELOPMENT: Auto clear localStorage on every reload
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🧹 Development mode: Auto clearing localStorage');
+    if (process.env.NODE_ENV === "development") {
+      console.log("🧹 Development mode: Auto clearing localStorage");
       localStorage.clear();
       return;
     }
 
     // PRODUCTION: Normal behavior - restore from localStorage
-    const savedAuth = localStorage.getItem('isAuthenticated');
-    const savedRole = localStorage.getItem('userRole');
-    const savedEmail = localStorage.getItem('userEmail');
+    const savedAuth = localStorage.getItem("isAuthenticated");
+    const savedRole = localStorage.getItem("userRole");
+    const savedEmail = localStorage.getItem("userEmail");
 
-    console.log('🔄 Initializing auth state:', { savedAuth, savedRole, savedEmail });
+    console.log("🔄 Initializing auth state:", {
+      savedAuth,
+      savedRole,
+      savedEmail,
+    });
 
-    if (savedAuth === 'true' && savedRole && savedEmail) {
+    if (savedAuth === "true" && savedRole && savedEmail) {
       setIsAuthenticated(true);
       setUserRole(savedRole);
       setUserEmail(savedEmail);
-      console.log('✅ Auth restored from localStorage');
+      console.log("✅ Auth restored from localStorage");
     }
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('🚀 Login process started');
+    console.log("🚀 Login process started");
     setLoading(true);
 
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log('⏳ Processing login...');
+        console.log("⏳ Processing login...");
         setLoading(false);
         const role = loginForm.role === "admin" ? "admin" : "employee";
         setUserRole(role);
         setUserEmail(loginForm.email);
         setIsAuthenticated(true);
-        
+
         // Only save to localStorage in production
-        if (process.env.NODE_ENV === 'production') {
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('userRole', role);
-          localStorage.setItem('userEmail', loginForm.email);
+        if (process.env.NODE_ENV === "production") {
+          localStorage.setItem("isAuthenticated", "true");
+          localStorage.setItem("userRole", role);
+          localStorage.setItem("userEmail", loginForm.email);
         }
 
-        console.log('✅ Login successful:', { role, email: loginForm.email });
-        alert(`Login berhasil sebagai ${loginForm.role === "admin" ? "Administrator" : "Employee"}`);
-        
+        console.log("✅ Login successful:", { role, email: loginForm.email });
+        alert(
+          `Login berhasil sebagai ${
+            loginForm.role === "admin" ? "Administrator" : "Employee"
+          }`
+        );
+
         resolve(true);
       }, 1000);
     });
   };
 
   const handleLogout = () => {
-    console.log('🚪 Logout initiated');
+    console.log("🚪 Logout initiated");
     setUserRole("employee");
     setUserEmail("");
     setIsAuthenticated(false);
     setLoginForm({ email: "", password: "", role: "user" });
-    
+
     localStorage.clear();
-    
-    console.log('✅ Logout completed');
+
+    console.log("✅ Logout completed");
   };
 
   const fillDemoCredentials = (type) => {
@@ -580,7 +653,9 @@ const App = () => {
   // Protected Route Component - ALL PRESERVED
   const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
-      console.log('🚫 Protected route accessed without authentication, redirecting to login');
+      console.log(
+        "🚫 Protected route accessed without authentication, redirecting to login"
+      );
       return <Navigate to="/login" replace />;
     }
     return children;
@@ -593,19 +668,21 @@ const App = () => {
         <h1 className="module-title">Employee Management</h1>
         <div className="module-content">
           <p>Halaman Employee Management sedang dalam pengembangan...</p>
-          <p>User: {userEmail} | Role: {userRole}</p>
+          <p>
+            User: {userEmail} | Role: {userRole}
+          </p>
         </div>
       </div>
     </div>
   );
 
-  console.log('🎯 App render state:', { isAuthenticated, userRole, userEmail });
+  console.log("🎯 App render state:", { isAuthenticated, userRole, userEmail });
 
   return (
     <Router>
       <div className="App">
         {/* UNIFIED NAVIGATION - RENOVATED */}
-        <UnifiedNavigation 
+        <UnifiedNavigation
           userRole={userRole}
           userEmail={userEmail}
           isAuthenticated={isAuthenticated}
@@ -615,116 +692,188 @@ const App = () => {
         <div className="main-content">
           <Routes>
             {/* Public Routes - ALL PRESERVED */}
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
-                isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <LoginPage 
-                  onLogin={handleLogin}
-                  loginForm={loginForm}
-                  setLoginForm={setLoginForm}
-                  loading={loading}
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
-                  fillDemoCredentials={fillDemoCredentials}
-                />
-              } 
+                isAuthenticated ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <LoginPage
+                    onLogin={handleLogin}
+                    loginForm={loginForm}
+                    setLoginForm={setLoginForm}
+                    loading={loading}
+                    showPassword={showPassword}
+                    setShowPassword={setShowPassword}
+                    fillDemoCredentials={fillDemoCredentials}
+                  />
+                )
+              }
             />
-            
-            <Route 
-              path="/login" 
+
+            <Route
+              path="/login"
               element={
-                isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <LoginPage 
-                  onLogin={handleLogin}
-                  loginForm={loginForm}
-                  setLoginForm={setLoginForm}
-                  loading={loading}
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
-                  fillDemoCredentials={fillDemoCredentials}
-                />
-              } 
+                isAuthenticated ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <LoginPage
+                    onLogin={handleLogin}
+                    loginForm={loginForm}
+                    setLoginForm={setLoginForm}
+                    loading={loading}
+                    showPassword={showPassword}
+                    setShowPassword={setShowPassword}
+                    fillDemoCredentials={fillDemoCredentials}
+                  />
+                )
+              }
             />
-            
+
             {/* Protected Routes - ALL PRESERVED */}
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <DashboardMain userRole={userRole} />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Dashboard Module Routes - ALL PRESERVED */}
-            <Route path="/dashboard/profile" element={<ProtectedRoute><ProfileModule /></ProtectedRoute>} />
-            <Route path="/dashboard/attendance" element={<ProtectedRoute><AttendanceModule /></ProtectedRoute>} />
-            <Route path="/dashboard/leave" element={<ProtectedRoute><LeaveModule /></ProtectedRoute>} />
-            <Route path="/dashboard/payroll" element={<ProtectedRoute><PayrollModule /></ProtectedRoute>} />
-            <Route path="/dashboard/performance" element={<ProtectedRoute><PerformanceModule /></ProtectedRoute>} />
-            <Route path="/dashboard/training" element={<ProtectedRoute><TrainingModule /></ProtectedRoute>} />
-            <Route path="/dashboard/communication" element={<ProtectedRoute><CommunicationModule /></ProtectedRoute>} />
-            <Route path="/dashboard/documents" element={<ProtectedRoute><DocumentsModule /></ProtectedRoute>} />
-            
+            <Route
+              path="/dashboard/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfileModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/attendance"
+              element={
+                <ProtectedRoute>
+                  <AttendanceModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/leave"
+              element={
+                <ProtectedRoute>
+                  <LeaveModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/payroll"
+              element={
+                <ProtectedRoute>
+                  <PayrollModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/performance"
+              element={
+                <ProtectedRoute>
+                  <PerformanceModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/training"
+              element={
+                <ProtectedRoute>
+                  <TrainingModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/communication"
+              element={
+                <ProtectedRoute>
+                  <CommunicationModule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/documents"
+              element={
+                <ProtectedRoute>
+                  <DocumentsModule />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Admin Routes - ALL PRESERVED */}
-            <Route 
-              path="/dashboard/admin/employees" 
+            <Route
+              path="/dashboard/admin/employees"
               element={
                 <ProtectedRoute>
-                  {userRole === 'admin' ? <EmployeeManagementModule /> : <Navigate to="/dashboard" />}
+                  {userRole === "admin" ? (
+                    <EmployeeManagementModule />
+                  ) : (
+                    <Navigate to="/dashboard" />
+                  )}
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/dashboard/admin/analytics" 
+            <Route
+              path="/dashboard/admin/analytics"
               element={
                 <ProtectedRoute>
-                  {userRole === 'admin' ? <AnalyticsModule /> : <Navigate to="/dashboard" />}
+                  {userRole === "admin" ? (
+                    <AnalyticsModule />
+                  ) : (
+                    <Navigate to="/dashboard" />
+                  )}
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/dashboard/admin/settings" 
+            <Route
+              path="/dashboard/admin/settings"
               element={
                 <ProtectedRoute>
-                  {userRole === 'admin' ? <SettingsModule /> : <Navigate to="/dashboard" />}
+                  {userRole === "admin" ? (
+                    <SettingsModule />
+                  ) : (
+                    <Navigate to="/dashboard" />
+                  )}
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Application Routes - ALL PRESERVED */}
-            <Route 
-              path="/pusat-informasi" 
+            <Route
+              path="/pusat-informasi"
               element={
                 <ProtectedRoute>
                   <div className="dashboard-content">
                     <PusatInformasi userRole={userRole} userEmail={userEmail} />
                   </div>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/employee" 
+            <Route
+              path="/employee"
               element={
                 <ProtectedRoute>
                   <EmployeePage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/registration" 
+            <Route
+              path="/registration"
               element={
                 <ProtectedRoute>
                   <div className="dashboard-content">
                     <Registration userRole={userRole} userEmail={userEmail} />
                   </div>
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Redirect any unknown routes to home - ALL PRESERVED */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
