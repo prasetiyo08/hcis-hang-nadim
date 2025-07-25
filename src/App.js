@@ -1,4 +1,4 @@
-// App.js - FINAL RENOVATED VERSION - All Functions Preserved
+// App.js - INTEGRATED WITH FIREBASE AUTH
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -10,9 +10,9 @@ import {
 } from "react-router-dom";
 import PusatInformasi from "./components/PusatInformasi";
 import Registration from "./components/Registration";
-import DashboardMain from "./components/Dashboard/DashboardMain";
-import ProfilePage from "./components/Profile/ProfilePage"; // ADD THIS IMPORT
-import { db } from "./services/firebase";
+import AdminDashboardMain from "./components/Dashboard/AdminDashboardMain";
+import AdminProfilePage from "./components/Profile/AdminProfilePage";
+import { AuthService } from "./services/authService";
 import {
   User,
   Lock,
@@ -25,20 +25,14 @@ import {
   X,
 } from "lucide-react";
 import "./App.css";
-import AttendancePage from "./components/Attendance/AttendancePage";
 
-// ===== MODULE COMPONENTS (ALL PRESERVED) =====
-const ProfileModule = () => (
+// ===== MODULE COMPONENTS =====
+const ProfileModule = ({ userEmail }) => (
   <div className="dashboard-content">
-    <ProfilePage />
+    <AdminProfilePage userEmail={userEmail} />
   </div>
 );
 
-const AttendanceModule = () => (
-  <div className="dashboard-content">
-    <AttendancePage />
-  </div>
-);
 const LeaveModule = () => (
   <div className="dashboard-module">
     <h1 className="module-title">🏖️ Cuti & Izin</h1>
@@ -93,6 +87,15 @@ const DocumentsModule = () => (
   </div>
 );
 
+const AttendanceModule = () => (
+  <div className="dashboard-module">
+    <h1 className="module-title">⏰ Absensi</h1>
+    <div className="module-content">
+      <p>Module Absensi - Coming Soon!</p>
+    </div>
+  </div>
+);
+
 const EmployeeManagementModule = () => (
   <div className="dashboard-module">
     <h1 className="module-title">👥 Manajemen Karyawan</h1>
@@ -120,7 +123,7 @@ const SettingsModule = () => (
   </div>
 );
 
-// ===== UNIFIED NAVIGATION COMPONENT - RENOVATED =====
+// ===== UNIFIED NAVIGATION COMPONENT =====
 const UnifiedNavigation = ({
   userRole,
   userEmail,
@@ -134,9 +137,9 @@ const UnifiedNavigation = ({
   // Check if current path is dashboard related
   const isDashboardPage = location.pathname.startsWith("/dashboard");
 
-  // Navigation items berdasarkan role untuk sidebar - UPDATED WITH 2-COLOR ICONS
+  // Navigation items berdasarkan role untuk sidebar
   const sidebarItems = {
-    employee: [
+    user: [
       { icon: "🔵🏠", label: "Dashboard", path: "/dashboard" },
       { icon: "🔵👤", label: "Profil Saya", path: "/dashboard/profile" },
       { icon: "🔵⏰", label: "Absensi", path: "/dashboard/attendance" },
@@ -152,31 +155,17 @@ const UnifiedNavigation = ({
       { icon: "🔵📄", label: "Dokumen", path: "/dashboard/documents" },
     ],
     admin: [
-      { icon: "🔵🏠", label: "Dashboard", path: "/dashboard" },
-      {
-        icon: "🔵👥",
-        label: "Manajemen Karyawan",
-        path: "/dashboard/admin/employees",
-      },
-      { icon: "🔵⏰", label: "Absensi", path: "/dashboard/attendance" },
-      { icon: "🔵🏖️", label: "Cuti & Izin", path: "/dashboard/leave" },
-      { icon: "🔵💰", label: "Penggajian", path: "/dashboard/payroll" },
-      {
-        icon: "🔵📈",
-        label: "Penilaian Kinerja",
-        path: "/dashboard/performance",
-      },
-      { icon: "🔵🎓", label: "Pelatihan", path: "/dashboard/training" },
-      { icon: "🔵💬", label: "Komunikasi", path: "/dashboard/communication" },
-      { icon: "🔵📄", label: "Dokumen", path: "/dashboard/documents" },
-      { icon: "🔵📊", label: "Analytics", path: "/dashboard/admin/analytics" },
-      { icon: "🔵⚙️", label: "Settings", path: "/dashboard/admin/settings" },
+      { icon: "🔵🏠", label: "Admin Dashboard", path: "/dashboard" },
+      { icon: "🔵👤", label: "Profile Admin", path: "/dashboard/admin-profile" },
+      { icon: "🔵👥", label: "Manajemen Karyawan", path: "/dashboard/employees" },
+      { icon: "🔵📊", label: "Analytics", path: "/dashboard/analytics" },
+      { icon: "🔵⚙️", label: "Settings", path: "/dashboard/settings" },
     ],
   };
 
-  const navItems = sidebarItems[userRole] || sidebarItems.employee;
+  const navItems = sidebarItems[userRole] || sidebarItems.user;
 
-  // Check if current path is active (ALL PRESERVED)
+  // Check if current path is active
   const isActivePath = (path) => {
     if (path === "/dashboard") {
       return location.pathname === "/dashboard";
@@ -184,19 +173,17 @@ const UnifiedNavigation = ({
     return location.pathname.startsWith(path);
   };
 
-  // RENOVATED: Auto-close sidebar on route change
+  // Auto-close sidebar on route change
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
   return (
     <>
-      {/* TOP NAVIGATION - RENOVATED BUT ALL FUNCTIONS PRESERVED */}
+      {/* TOP NAVIGATION */}
       <div className="nav-header">
         <div className="nav-content">
-          {/* Logo Section with RENOVATED hamburger placement */}
           <div className="logo-section">
-            {/* RENOVATED: Hamburger Menu - Always visible when authenticated */}
             {isAuthenticated && (
               <button
                 className="mobile-menu-button"
@@ -220,7 +207,6 @@ const UnifiedNavigation = ({
             </div>
           </div>
 
-          {/* Navigation Menu - BERANDA BUTTON REMOVED */}
           <div className="nav-menu">
             {isAuthenticated && (
               <>
@@ -278,17 +264,18 @@ const UnifiedNavigation = ({
         </div>
       </div>
 
-      {/* SIDEBAR - RENOVATED TO ALWAYS BE POPUP - Only show when authenticated */}
+      {/* SIDEBAR */}
       {isAuthenticated && (
         <>
-          {/* Sidebar */}
           <div
             className={`dashboard-sidebar ${
               isSidebarOpen ? "sidebar-open" : ""
             }`}
           >
             <div className="sidebar-header">
-              <div className="sidebar-title">📊 Dashboard Modules</div>
+              <div className="sidebar-title">
+                {userRole === 'admin' ? '🔧 Admin Panel' : '📊 Dashboard Modules'}
+              </div>
               <button
                 className="sidebar-close"
                 onClick={() => setIsSidebarOpen(false)}
@@ -340,7 +327,6 @@ const UnifiedNavigation = ({
             </div>
           </div>
 
-          {/* Sidebar Overlay - RENOVATED with blur effect */}
           {isSidebarOpen && (
             <div
               className="sidebar-overlay"
@@ -353,7 +339,7 @@ const UnifiedNavigation = ({
   );
 };
 
-// ===== LOGIN PAGE COMPONENT - ALL PRESERVED =====
+// ===== LOGIN PAGE COMPONENT =====
 const LoginPage = ({
   onLogin,
   loginForm,
@@ -362,6 +348,7 @@ const LoginPage = ({
   showPassword,
   setShowPassword,
   fillDemoCredentials,
+  error,
 }) => {
   const navigate = useNavigate();
 
@@ -416,6 +403,21 @@ const LoginPage = ({
             <h2 className="form-title">Masuk ke HCIS</h2>
             <p className="form-subtitle">Human Capital Information System</p>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div style={{
+              background: '#fee2e2',
+              color: '#dc2626',
+              padding: '12px',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              border: '1px solid #fecaca',
+              fontSize: '14px'
+            }}>
+              ❌ {error}
+            </div>
+          )}
 
           <div className="role-selector">
             <button
@@ -548,7 +550,7 @@ const LoginPage = ({
   );
 };
 
-// ===== MAIN APP COMPONENT - ALL LOGIC PRESERVED =====
+// ===== MAIN APP COMPONENT =====
 const App = () => {
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -557,111 +559,138 @@ const App = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [userRole, setUserRole] = useState("employee");
-  const [userEmail, setUserEmail] = useState("");
+  const [authLoading, setAuthLoading] = useState(true);
+  const [error, setError] = useState("");
+  
+  // User state from Firebase
+  const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Initialize authentication state - ALL PRESERVED
+  // Computed values from user object
+  const userRole = user?.role || "user";
+  const userEmail = user?.email || "";
+
+  // Initialize Firebase Auth listener
   useEffect(() => {
-    // DEVELOPMENT: Auto clear localStorage on every reload
-    if (process.env.NODE_ENV === "development") {
-      console.log("🧹 Development mode: Auto clearing localStorage");
-      localStorage.clear();
-      return;
-    }
-
-    // PRODUCTION: Normal behavior - restore from localStorage
-    const savedAuth = localStorage.getItem("isAuthenticated");
-    const savedRole = localStorage.getItem("userRole");
-    const savedEmail = localStorage.getItem("userEmail");
-
-    console.log("🔄 Initializing auth state:", {
-      savedAuth,
-      savedRole,
-      savedEmail,
+    console.log("🔄 Setting up Firebase Auth listener...");
+    
+    const unsubscribe = AuthService.onAuthStateChanged((userData) => {
+      console.log("🔍 Auth state changed:", userData);
+      
+      if (userData) {
+        setUser(userData);
+        setIsAuthenticated(true);
+        console.log("✅ User authenticated:", {
+          email: userData.email,
+          role: userData.role,
+          uid: userData.uid
+        });
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+        console.log("👤 User not authenticated");
+      }
+      
+      setAuthLoading(false);
     });
 
-    if (savedAuth === "true" && savedRole && savedEmail) {
-      setIsAuthenticated(true);
-      setUserRole(savedRole);
-      setUserEmail(savedEmail);
-      console.log("✅ Auth restored from localStorage");
+    // Create demo accounts in development
+    if (process.env.NODE_ENV === "development") {
+      AuthService.createDemoAccounts().catch(error => {
+        console.warn("⚠️ Demo accounts creation failed:", error);
+      });
     }
+
+    return unsubscribe;
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     console.log("🚀 Login process started");
     setLoading(true);
+    setError("");
 
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("⏳ Processing login...");
-        setLoading(false);
-        const role = loginForm.role === "admin" ? "admin" : "employee";
-        setUserRole(role);
-        setUserEmail(loginForm.email);
-        setIsAuthenticated(true);
+    try {
+      console.log("📝 Login attempt:", {
+        email: loginForm.email,
+        role: loginForm.role
+      });
 
-        // Only save to localStorage in production
-        if (process.env.NODE_ENV === "production") {
-          localStorage.setItem("isAuthenticated", "true");
-          localStorage.setItem("userRole", role);
-          localStorage.setItem("userEmail", loginForm.email);
-        }
-
-        console.log("✅ Login successful:", { role, email: loginForm.email });
-        alert(
-          `Login berhasil sebagai ${
-            loginForm.role === "admin" ? "Administrator" : "Employee"
-          }`
-        );
-
-        resolve(true);
-      }, 1000);
-    });
+      const userData = await AuthService.login(loginForm.email, loginForm.password);
+      
+      console.log("✅ Login successful:", userData);
+      
+      // Firebase Auth listener will handle state updates
+      return true;
+      
+    } catch (error) {
+      console.error("❌ Login failed:", error);
+      setError(error.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     console.log("🚪 Logout initiated");
-    setUserRole("employee");
-    setUserEmail("");
-    setIsAuthenticated(false);
-    setLoginForm({ email: "", password: "", role: "user" });
-
-    localStorage.clear();
-
-    console.log("✅ Logout completed");
+    
+    try {
+      await AuthService.logout();
+      setLoginForm({ email: "", password: "", role: "user" });
+      setError("");
+      console.log("✅ Logout completed");
+    } catch (error) {
+      console.error("❌ Logout failed:", error);
+      setError("Gagal logout: " + error.message);
+    }
   };
 
   const fillDemoCredentials = (type) => {
+    const demoAccounts = AuthService.getDemoAccounts();
+    
     if (type === "admin") {
       setLoginForm({
-        email: "admin@hangnadim.com",
-        password: "admin123",
+        email: demoAccounts.admin.email,
+        password: demoAccounts.admin.password,
         role: "admin",
       });
     } else {
       setLoginForm({
-        email: "user@hangnadim.com",
-        password: "user123",
+        email: demoAccounts.user.email,
+        password: demoAccounts.user.password,
         role: "user",
       });
     }
+    setError("");
   };
 
-  // Protected Route Component - ALL PRESERVED
+  // Protected Route Component
   const ProtectedRoute = ({ children }) => {
-    if (!isAuthenticated) {
-      console.log(
-        "🚫 Protected route accessed without authentication, redirecting to login"
+    if (authLoading) {
+      return (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '50vh',
+          flexDirection: 'column',
+          gap: '1rem'
+        }}>
+          <div className="loading-spinner" style={{ width: '40px', height: '40px' }}></div>
+          <p>Loading...</p>
+        </div>
       );
+    }
+
+    if (!isAuthenticated) {
+      console.log("🚫 Protected route accessed without authentication, redirecting to login");
       return <Navigate to="/login" replace />;
     }
     return children;
   };
 
-  // Employee Page Component - ALL PRESERVED
+  // Employee Page Component
   const EmployeePage = () => (
     <div className="dashboard-content">
       <div className="dashboard-module">
@@ -676,12 +705,36 @@ const App = () => {
     </div>
   );
 
-  console.log("🎯 App render state:", { isAuthenticated, userRole, userEmail });
+  console.log("🎯 App render state:", { 
+    isAuthenticated, 
+    userRole, 
+    userEmail, 
+    authLoading,
+    user: user ? { email: user.email, role: user.role } : null 
+  });
+
+  // Show loading while Firebase initializes
+  if (authLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        flexDirection: 'column',
+        gap: '1rem',
+        background: '#f8fafc'
+      }}>
+        <div className="loading-spinner" style={{ width: '50px', height: '50px' }}></div>
+        <p>Initializing HCIS...</p>
+      </div>
+    );
+  }
 
   return (
     <Router>
       <div className="App">
-        {/* UNIFIED NAVIGATION - RENOVATED */}
+        {/* UNIFIED NAVIGATION */}
         <UnifiedNavigation
           userRole={userRole}
           userEmail={userEmail}
@@ -691,7 +744,7 @@ const App = () => {
 
         <div className="main-content">
           <Routes>
-            {/* Public Routes - ALL PRESERVED */}
+            {/* Public Routes */}
             <Route
               path="/"
               element={
@@ -706,6 +759,7 @@ const App = () => {
                     showPassword={showPassword}
                     setShowPassword={setShowPassword}
                     fillDemoCredentials={fillDemoCredentials}
+                    error={error}
                   />
                 )
               }
@@ -725,27 +779,40 @@ const App = () => {
                     showPassword={showPassword}
                     setShowPassword={setShowPassword}
                     fillDemoCredentials={fillDemoCredentials}
+                    error={error}
                   />
                 )
               }
             />
 
-            {/* Protected Routes - ALL PRESERVED */}
+            {/* Protected Routes - Dashboard */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <DashboardMain userRole={userRole} />
+                  <AdminDashboardMain userRole={userRole} userEmail={userEmail} />
                 </ProtectedRoute>
               }
             />
 
-            {/* Dashboard Module Routes - ALL PRESERVED */}
+            {/* Admin Profile Route */}
+            <Route
+              path="/dashboard/admin-profile"
+              element={
+                <ProtectedRoute>
+                  <div className="dashboard-content">
+                    <AdminProfilePage userEmail={userEmail} />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Module Routes - Available for all users */}
             <Route
               path="/dashboard/profile"
               element={
                 <ProtectedRoute>
-                  <ProfileModule />
+                  <ProfileModule userEmail={userEmail} />
                 </ProtectedRoute>
               }
             />
@@ -806,45 +873,33 @@ const App = () => {
               }
             />
 
-            {/* Admin Routes - ALL PRESERVED */}
+            {/* Admin Routes */}
             <Route
-              path="/dashboard/admin/employees"
+              path="/dashboard/employees"
               element={
                 <ProtectedRoute>
-                  {userRole === "admin" ? (
-                    <EmployeeManagementModule />
-                  ) : (
-                    <Navigate to="/dashboard" />
-                  )}
+                  <EmployeeManagementModule />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/dashboard/admin/analytics"
+              path="/dashboard/analytics"
               element={
                 <ProtectedRoute>
-                  {userRole === "admin" ? (
-                    <AnalyticsModule />
-                  ) : (
-                    <Navigate to="/dashboard" />
-                  )}
+                  <AnalyticsModule />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/dashboard/admin/settings"
+              path="/dashboard/settings"
               element={
                 <ProtectedRoute>
-                  {userRole === "admin" ? (
-                    <SettingsModule />
-                  ) : (
-                    <Navigate to="/dashboard" />
-                  )}
+                  <SettingsModule />
                 </ProtectedRoute>
               }
             />
 
-            {/* Application Routes - ALL PRESERVED */}
+            {/* Application Routes */}
             <Route
               path="/pusat-informasi"
               element={
@@ -874,7 +929,7 @@ const App = () => {
               }
             />
 
-            {/* Redirect any unknown routes to home - ALL PRESERVED */}
+            {/* Redirect any unknown routes to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

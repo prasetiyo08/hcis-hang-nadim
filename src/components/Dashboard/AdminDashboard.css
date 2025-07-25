@@ -1,0 +1,124 @@
+/* src/components/Dashboard/AdminDashboard.css */
+
+/* ===== CONTAINER ===== */
+.admin-dashboard-container {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* ===== ADMIN HEADER ===== */
+.admin-dashboard-header {
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  color: white;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-decoration {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.header-content {
+  position: relative;
+  z-index: 10;
+}
+
+.admin-greeting {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+}
+
+.admin-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0 0 1rem 0;
+}
+
+.admin-clock {
+  font-size: 1.5rem;
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+}
+
+/* ===== EMPLOYEE NOTICE ===== */
+.employee-notice {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.employee-notice h2 {
+  font-size: 1.5rem;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.employee-notice p {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .admin-dashboard-header {
+    margin: 0 1rem 2rem 1rem;
+    padding: 1.5rem;
+  }
+  
+  .admin-greeting {
+    font-size: 2rem;
+  }
+  
+  .admin-subtitle {
+    font-size: 1rem;
+  }
+  
+  .admin-clock {
+    font-size: 1.25rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .employee-notice {
+    margin: 0 1rem;
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+  .admin-greeting {
+    font-size: 1.75rem;
+  }
+  
+  .admin-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .admin-clock {
+    font-size: 1.125rem;
+  }
+}

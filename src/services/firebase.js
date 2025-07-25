@@ -1,95 +1,34 @@
-// src/services/firebase.js - Version without Storage
+// src/services/firebase.js - Updated Configuration
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
-// Firebase configuration
+// Firebase configuration - UPDATE THESE VALUES WITH YOUR ACTUAL CONFIG
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
+  apiKey: "AIzaSyB8dzz0OaxyNXVEG4WB7dtYzCyLy1XbY6Q",
+  authDomain: "hcis-hang-nadim.firebaseapp.com", 
+  projectId: "hcis-hang-nadim",
+  storageBucket: "hcis-hang-nadim.firebasestorage.app",
+  messagingSenderId: "869733474054",
+  appId: "1:869733474054:web:432031e888f919fdb60887"
 };
 
-// Validate Firebase configuration
-const validateFirebaseConfig = () => {
-  const requiredKeys = [
-    'REACT_APP_FIREBASE_API_KEY',
-    'REACT_APP_FIREBASE_AUTH_DOMAIN',
-    'REACT_APP_FIREBASE_PROJECT_ID',
-    'REACT_APP_FIREBASE_MESSAGING_SENDER_ID',
-    'REACT_APP_FIREBASE_APP_ID'
-  ];
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-  const missingKeys = requiredKeys.filter(key => !process.env[key]);
-  
-  if (missingKeys.length > 0) {
-    console.error('❌ Missing Firebase configuration keys:', missingKeys);
-    console.error('Please check your .env file');
-    return false;
-  }
-  
-  console.log('✅ Firebase configuration validated');
-  return true;
-};
+// Initialize Firebase Auth
+export const auth = getAuth(app);
 
-// Initialize Firebase only if configuration is valid
-let app, db, auth;
+// Initialize Firestore
+export const db = getFirestore(app);
 
-try {
-  if (validateFirebaseConfig()) {
-    // Initialize Firebase
-    app = initializeApp(firebaseConfig);
-    
-    // Initialize Firebase services (NO STORAGE)
-    db = getFirestore(app);
-    auth = getAuth(app);
-    
-    console.log('🔥 Firebase initialized successfully');
-    console.log('📊 Firestore ready');
-    console.log('🔐 Auth ready');
-    console.log('📁 Storage: DISABLED (using local base64 instead)');
-  }
-} catch (error) {
-  console.error('❌ Firebase initialization failed:', error);
-}
+// Initialize Storage
+export const storage = getStorage(app);
 
-// Export Firebase services (NO STORAGE)
-export { db, auth };
 export default app;
 
-// Helper functions
-export const isFirebaseReady = () => {
-  return !!(app && db && auth);
-};
-
-export const getFirebaseConfig = () => {
-  return {
-    projectId: firebaseConfig.projectId,
-    authDomain: firebaseConfig.authDomain,
-    isReady: isFirebaseReady(),
-    storageEnabled: false // Explicitly disabled
-  };
-};
-
-// Debug function for development
-export const debugFirebaseConfig = () => {
-  if (process.env.NODE_ENV === 'development') {
-    console.group('🔥 Firebase Configuration Debug');
-    console.log('Project ID:', firebaseConfig.projectId);
-    console.log('Auth Domain:', firebaseConfig.authDomain);
-    console.log('App Ready:', !!app);
-    console.log('Firestore Ready:', !!db);
-    console.log('Auth Ready:', !!auth);
-    console.log('Storage Enabled:', false);
-    console.log('All Required Services Ready:', isFirebaseReady());
-    console.groupEnd();
-  }
-};
-
-// Alternative file handling functions (without Firebase Storage)
+// Helper functions for file handling (without Firebase Storage)
 export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -99,19 +38,130 @@ export const fileToBase64 = (file) => {
   });
 };
 
-export const validateFile = (file, maxSizeMB = 2, allowedTypes = ['image/jpeg', 'image/png', 'image/gif']) => {
-  if (!file) return { valid: false, error: 'No file selected' };
-  
+export const validateFile = (file, maxSizeMB = 5, allowedTypes = ['image/jpeg', 'image/png', 'image/gif']) => {
+  if (!file) {
+    return { valid: false, error: 'No file provided' };
+  }
+
   // Check file size
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
   if (file.size > maxSizeBytes) {
-    return { valid: false, error: `File size must be less than ${maxSizeMB}MB` };
+    return { 
+      valid: false, 
+      error: `File size exceeds ${maxSizeMB}MB limit` 
+    };
   }
-  
+
   // Check file type
   if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: `File type must be: ${allowedTypes.join(', ')}` };
+    return { 
+      valid: false, 
+      error: `File type not allowed. Allowed types: ${allowedTypes.join(', ')}` 
+    };
   }
-  
+
   return { valid: true };
+};
+
+// Helper functions for profile management
+export const profileHelpers = {
+  // Create or update admin profile
+  createAdminProfile: async (email, profileData) => {
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      await setDoc(doc(db, 'admin_profiles', email), {
+        ...profileData,
+        email,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error creating admin profile:', error);
+      return { success: false, error };
+    }
+  },
+
+  // Get admin profile
+  getAdminProfile: async (email) => {
+    try {
+      const { doc, getDoc } = await import('firebase/firestore');
+      const docRef = doc(db, 'admin_profiles', email);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return { success: true, data: docSnap.data() };
+      } else {
+        return { success: false, error: 'Profile not found' };
+      }
+    } catch (error) {
+      console.error('Error getting admin profile:', error);
+      return { success: false, error };
+    }
+  },
+
+  // Update admin profile
+  updateAdminProfile: async (email, updates) => {
+    try {
+      const { doc, updateDoc } = await import('firebase/firestore');
+      await updateDoc(doc(db, 'admin_profiles', email), {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating admin profile:', error);
+      return { success: false, error };
+    }
+  },
+
+  // Create or update employee profile
+  createEmployeeProfile: async (email, profileData) => {
+    try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      await setDoc(doc(db, 'employee_profiles', email), {
+        ...profileData,
+        email,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error creating employee profile:', error);
+      return { success: false, error };
+    }
+  },
+
+  // Get employee profile
+  getEmployeeProfile: async (email) => {
+    try {
+      const { doc, getDoc } = await import('firebase/firestore');
+      const docRef = doc(db, 'employee_profiles', email);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return { success: true, data: docSnap.data() };
+      } else {
+        return { success: false, error: 'Profile not found' };
+      }
+    } catch (error) {
+      console.error('Error getting employee profile:', error);
+      return { success: false, error };
+    }
+  },
+
+  // Update employee profile
+  updateEmployeeProfile: async (email, updates) => {
+    try {
+      const { doc, updateDoc } = await import('firebase/firestore');
+      await updateDoc(doc(db, 'employee_profiles', email), {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating employee profile:', error);
+      return { success: false, error };
+    }
+  }
 };
