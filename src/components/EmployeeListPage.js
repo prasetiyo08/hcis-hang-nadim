@@ -1,10 +1,9 @@
-// src/components/EmployeeListPage.js - FIXED CSS Import
+// src/components/EmployeeListPage.js - Horizontal Layout Version
 import React, { useState, useEffect } from 'react';
 import { 
   collection, 
   getDocs, 
   doc, 
-  updateDoc, 
   deleteDoc,
   query,
   orderBy 
@@ -15,24 +14,20 @@ import {
   Search,
   Filter,
   Edit3,
-  Save,
-  X,
   Trash2,
-  Eye,
   Plus,
-  Download,
   Upload,
   AlertCircle,
   CheckCircle,
   User,
   Mail,
   Phone,
-  MapPin,
-  Briefcase,
-  Calendar,
-  DollarSign
+  Building,
+  Grid,
+  List,
+  Eye
 } from 'lucide-react';
-// FIXED: Import CSS file
+import EmployeeDetailModal from './EmployeeDetailModal';
 import './EmployeeListPage.css';
 
 const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
@@ -41,10 +36,10 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('');
-  const [editingEmployee, setEditingEmployee] = useState(null);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
   // Load employees data
@@ -116,49 +111,6 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
     return departments.sort();
   };
 
-  const handleEdit = (employee) => {
-    if (userRole !== 'admin') {
-      setMessage('❌ Hanya admin yang bisa mengedit data pegawai');
-      return;
-    }
-    setEditingEmployee({ ...employee });
-  };
-
-  const handleSave = async () => {
-    if (!editingEmployee || userRole !== 'admin') return;
-
-    setSaving(true);
-    try {
-      console.log('💾 Saving employee:', editingEmployee.id);
-
-      const { id, createdAt, updatedAt, createdBy, source, ...updateData } = editingEmployee;
-      
-      await updateDoc(doc(db, 'employees', id), {
-        ...updateData,
-        updatedAt: new Date().toISOString(),
-        updatedBy: userEmail
-      });
-
-      // Update local state
-      setEmployees(prev => 
-        prev.map(emp => 
-          emp.id === id ? { ...editingEmployee, updatedAt: new Date().toISOString() } : emp
-        )
-      );
-
-      setEditingEmployee(null);
-      setMessage('✅ Data pegawai berhasil diupdate!');
-      
-      setTimeout(() => setMessage(''), 3000);
-
-    } catch (error) {
-      console.error('❌ Error saving employee:', error);
-      setMessage('❌ Gagal menyimpan data: ' + error.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleDelete = async (employeeId, employeeName) => {
     if (userRole !== 'admin') {
       setMessage('❌ Hanya admin yang bisa menghapus data pegawai');
@@ -166,7 +118,7 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
     }
 
     const confirmDelete = window.confirm(
-      `Apakah Anda yakin ingin menghapus data pegawai "${employeeName}"?\n\nTindakan ini tidak dapat dibatalkan.`
+      `Apakah Anda yakin ingin menghapus data pegawai "${capitalizeWords(employeeName)}"?\n\nTindakan ini tidak dapat dibatalkan.`
     );
 
     if (!confirmDelete) return;
@@ -179,7 +131,7 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
       // Remove from local state
       setEmployees(prev => prev.filter(emp => emp.id !== employeeId));
       
-      setMessage(`✅ Data pegawai "${employeeName}" berhasil dihapus`);
+      setMessage(`✅ Data pegawai "${capitalizeWords(employeeName)}" berhasil dihapus`);
       setTimeout(() => setMessage(''), 3000);
 
     } catch (error) {
@@ -188,332 +140,148 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
     }
   };
 
-  const handleInputChange = (field, value) => {
-    setEditingEmployee(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleViewDetail = (employee) => {
+    setSelectedEmployee(employee);
+    setShowDetailModal(true);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    try {
-      return new Date(dateString).toLocaleDateString('id-ID');
-    } catch {
-      return dateString;
-    }
+  const handleCloseDetail = () => {
+    setShowDetailModal(false);
+    setSelectedEmployee(null);
   };
 
-  const formatCurrency = (amount) => {
-    if (!amount) return '-';
-    try {
-      return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0
-      }).format(amount);
-    } catch {
-      return amount;
-    }
+  const handleEmployeeUpdate = (updatedEmployee) => {
+    setEmployees(prev => 
+      prev.map(emp => 
+        emp.id === updatedEmployee.id ? updatedEmployee : emp
+      )
+    );
+    setMessage('✅ Data pegawai berhasil diupdate!');
+    setTimeout(() => setMessage(''), 3000);
+  };
+
+  // Utility function to capitalize words properly
+  const capitalizeWords = (str) => {
+    if (!str) return '';
+    return str.replace(/\b\w+/g, (word) => {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+  };
+
+  // Get employee initials for avatar
+  const getInitials = (name) => {
+    if (!name) return 'N/A';
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const renderEmployeeCard = (employee) => (
-    <div key={employee.id} className="employee-card">
-      <div className="employee-card-header">
-        <div className="employee-avatar">
-          <User size={24} />
-        </div>
-        <div className="employee-basic-info">
-          <h3>{employee.fullName || 'Nama tidak tersedia'}</h3>
-          <p className="employee-position">
-            {employee.position || 'Posisi tidak tersedia'} • {employee.department || 'Departemen tidak tersedia'}
-          </p>
-          <p className="employee-id">ID: {employee.nik || employee.id}</p>
-        </div>
+    <div key={employee.id} className="employee-card-horizontal">
+      <div className="employee-avatar">
+        {getInitials(employee.fullName)}
+      </div>
+      
+      <div className="employee-info">
+        <h3 className="employee-name">
+          {capitalizeWords(employee.fullName) || 'Nama Tidak Tersedia'}
+        </h3>
+        <p className="employee-position">
+          {capitalizeWords(employee.position) || 'Posisi Tidak Tersedia'}
+        </p>
+        <p className="employee-department">
+          {capitalizeWords(employee.department) || 'Departemen Tidak Tersedia'}
+        </p>
+        <p className="employee-contact">
+          <Mail size={12} />
+          {employee.email}
+        </p>
+      </div>
+
+      <div className="employee-actions">
+        <button
+          onClick={() => handleViewDetail(employee)}
+          className="btn-view"
+          title="Lihat Detail"
+        >
+          <Eye size={16} />
+        </button>
         {userRole === 'admin' && (
-          <div className="employee-actions">
-            <button
-              onClick={() => handleEdit(employee)}
-              className="btn-edit"
-              title="Edit"
-            >
-              <Edit3 size={16} />
-            </button>
+          <>
             <button
               onClick={() => handleDelete(employee.id, employee.fullName)}
               className="btn-delete"
-              title="Delete"
+              title="Hapus Pegawai"
             >
               <Trash2 size={16} />
             </button>
-          </div>
-        )}
-      </div>
-
-      <div className="employee-card-body">
-        <div className="employee-info-grid">
-          <div className="info-item">
-            <Mail size={14} />
-            <span>{employee.email || '-'}</span>
-          </div>
-          <div className="info-item">
-            <Phone size={14} />
-            <span>{employee.phone || '-'}</span>
-          </div>
-          <div className="info-item">
-            <MapPin size={14} />
-            <span>{employee.address || '-'}</span>
-          </div>
-          <div className="info-item">
-            <Calendar size={14} />
-            <span>Bergabung: {formatDate(employee.joinDate)}</span>
-          </div>
-          <div className="info-item">
-            <Briefcase size={14} />
-            <span>{employee.employmentType || '-'}</span>
-          </div>
-          <div className="info-item">
-            <DollarSign size={14} />
-            <span>{formatCurrency(employee.salary)}</span>
-          </div>
-        </div>
-
-        {/* Additional Fields */}
-        {Object.keys(employee).some(key => 
-          !['id', 'fullName', 'email', 'phone', 'department', 'position', 'address', 'joinDate', 'employmentType', 'salary', 'nik', 'createdAt', 'updatedAt', 'createdBy', 'source', 'status'].includes(key)
-        ) && (
-          <div className="additional-fields">
-            <h4>Informasi Tambahan:</h4>
-            <div className="additional-fields-grid">
-              {Object.entries(employee).map(([key, value]) => {
-                if (['id', 'fullName', 'email', 'phone', 'department', 'position', 'address', 'joinDate', 'employmentType', 'salary', 'nik', 'createdAt', 'updatedAt', 'createdBy', 'source', 'status'].includes(key)) {
-                  return null;
-                }
-                return (
-                  <div key={key} className="additional-field">
-                    <strong>{key}:</strong> {value || '-'}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          </>
         )}
       </div>
     </div>
   );
 
   const renderTableView = () => (
-    <div className="table-container">
-      <table className="employees-table">
+    <div className="table-container-horizontal">
+      <table className="employees-table-horizontal">
         <thead>
           <tr>
-            <th>Nama</th>
-            <th>Email</th>
-            <th>Departemen</th>
+            <th>Avatar</th>
+            <th>Nama Pegawai</th>
             <th>Posisi</th>
+            <th>Departemen</th>
+            <th>Email</th>
             <th>Telepon</th>
-            <th>Status</th>
-            {userRole === 'admin' && <th>Aksi</th>}
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           {filteredEmployees.map(employee => (
-            <tr key={employee.id}>
+            <tr key={employee.id} onClick={() => handleViewDetail(employee)} className="table-row-clickable">
+              <td>
+                <div className="table-employee-avatar">
+                  {getInitials(employee.fullName)}
+                </div>
+              </td>
               <td>
                 <div className="table-employee-info">
-                  <strong>{employee.fullName}</strong>
+                  <strong>{capitalizeWords(employee.fullName)}</strong>
                   <small>{employee.nik || employee.id}</small>
                 </div>
               </td>
+              <td>{capitalizeWords(employee.position)}</td>
+              <td>{capitalizeWords(employee.department)}</td>
               <td>{employee.email}</td>
-              <td>{employee.department}</td>
-              <td>{employee.position}</td>
-              <td>{employee.phone}</td>
+              <td>{employee.phone || '-'}</td>
               <td>
-                <span className={`status-badge ${employee.status || 'active'}`}>
-                  {employee.status || 'Active'}
-                </span>
-              </td>
-              {userRole === 'admin' && (
-                <td>
-                  <div className="table-actions">
-                    <button
-                      onClick={() => handleEdit(employee)}
-                      className="btn-edit-small"
-                      title="Edit"
-                    >
-                      <Edit3 size={14} />
-                    </button>
+                <div className="table-actions" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => handleViewDetail(employee)}
+                    className="btn-view-small"
+                    title="Lihat Detail"
+                  >
+                    <Eye size={14} />
+                  </button>
+                  {userRole === 'admin' && (
                     <button
                       onClick={() => handleDelete(employee.id, employee.fullName)}
                       className="btn-delete-small"
-                      title="Delete"
+                      title="Hapus Pegawai"
                     >
                       <Trash2 size={14} />
                     </button>
-                  </div>
-                </td>
-              )}
+                  )}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   );
-
-  const renderEditModal = () => {
-    if (!editingEmployee) return null;
-
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2>Edit Data Pegawai</h2>
-            <button
-              onClick={() => setEditingEmployee(null)}
-              className="modal-close"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="modal-body">
-            <div className="edit-form-grid">
-              <div className="form-group">
-                <label>Nama Lengkap</label>
-                <input
-                  type="text"
-                  value={editingEmployee.fullName || ''}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  value={editingEmployee.email || ''}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Departemen</label>
-                <input
-                  type="text"
-                  value={editingEmployee.department || ''}
-                  onChange={(e) => handleInputChange('department', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Posisi</label>
-                <input
-                  type="text"
-                  value={editingEmployee.position || ''}
-                  onChange={(e) => handleInputChange('position', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Telepon</label>
-                <input
-                  type="text"
-                  value={editingEmployee.phone || ''}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>NIK</label>
-                <input
-                  type="text"
-                  value={editingEmployee.nik || ''}
-                  onChange={(e) => handleInputChange('nik', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label>Alamat</label>
-                <textarea
-                  value={editingEmployee.address || ''}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  rows={3}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Gaji</label>
-                <input
-                  type="number"
-                  value={editingEmployee.salary || ''}
-                  onChange={(e) => handleInputChange('salary', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Status Karyawan</label>
-                <select
-                  value={editingEmployee.employmentType || ''}
-                  onChange={(e) => handleInputChange('employmentType', e.target.value)}
-                >
-                  <option value="">Pilih Status</option>
-                  <option value="Permanent">Permanent</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Temporary">Temporary</option>
-                  <option value="Intern">Intern</option>
-                </select>
-              </div>
-
-              {/* Dynamic fields from Excel */}
-              {Object.entries(editingEmployee).map(([key, value]) => {
-                const skipFields = ['id', 'fullName', 'email', 'department', 'position', 'phone', 'nik', 'address', 'salary', 'employmentType', 'createdAt', 'updatedAt', 'createdBy', 'source', 'status'];
-                
-                if (skipFields.includes(key)) return null;
-
-                return (
-                  <div key={key} className="form-group">
-                    <label>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
-                    <input
-                      type="text"
-                      value={value || ''}
-                      onChange={(e) => handleInputChange(key, e.target.value)}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              onClick={() => setEditingEmployee(null)}
-              className="btn-cancel"
-            >
-              Batal
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="btn-save"
-            >
-              {saving ? (
-                <>
-                  <div className="loading-spinner-small"></div>
-                  Menyimpan...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  Simpan
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   if (loading) {
     return (
@@ -529,13 +297,15 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
       {/* Header */}
       <div className="page-header">
         <div className="header-left">
-          <Users size={32} />
+          <div className="header-icon">
+            <Users size={32} />
+          </div>
           <div>
             <h1>Data Pegawai</h1>
             <p>
               {userRole === 'admin' 
-                ? 'Kelola data pegawai perusahaan' 
-                : 'Lihat data pegawai perusahaan'
+                ? 'Kelola Data Pegawai Perusahaan' 
+                : 'Lihat Data Pegawai Perusahaan'
               }
             </p>
           </div>
@@ -587,14 +357,18 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
           <button
             onClick={() => setViewMode('grid')}
             className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            title="Tampilan Card"
           >
-            Grid
+            <Grid size={16} />
+            Card
           </button>
           <button
             onClick={() => setViewMode('table')}
             className={`view-btn ${viewMode === 'table' ? 'active' : ''}`}
+            title="Tampilan Tabel"
           >
-            Table
+            <List size={16} />
+            Tabel
           </button>
         </div>
       </div>
@@ -610,7 +384,7 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
             >
               <option value="">Semua Departemen</option>
               {getDepartments().map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
+                <option key={dept} value={dept}>{capitalizeWords(dept)}</option>
               ))}
             </select>
           </div>
@@ -620,14 +394,14 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
       {/* Stats */}
       <div className="stats-section">
         <div className="stat-card">
-          <Users size={20} />
+          <Users size={24} />
           <div>
             <h3>{filteredEmployees.length}</h3>
             <p>Total Pegawai</p>
           </div>
         </div>
         <div className="stat-card">
-          <Briefcase size={20} />
+          <Building size={24} />
           <div>
             <h3>{getDepartments().length}</h3>
             <p>Departemen</p>
@@ -638,7 +412,7 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
       {/* Employee List */}
       {filteredEmployees.length === 0 ? (
         <div className="empty-state">
-          <Users size={48} />
+          <Users size={64} />
           <h3>Belum Ada Data Pegawai</h3>
           <p>
             {employees.length === 0 
@@ -657,9 +431,9 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
           )}
         </div>
       ) : (
-        <div className={`employees-container ${viewMode}`}>
+        <div className={`employees-container-horizontal ${viewMode}`}>
           {viewMode === 'grid' ? (
-            <div className="employees-grid">
+            <div className="employees-grid-horizontal">
               {filteredEmployees.map(renderEmployeeCard)}
             </div>
           ) : (
@@ -668,8 +442,16 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
         </div>
       )}
 
-      {/* Edit Modal */}
-      {renderEditModal()}
+      {/* Detail Modal */}
+      {showDetailModal && selectedEmployee && (
+        <EmployeeDetailModal
+          employee={selectedEmployee}
+          userRole={userRole}
+          userEmail={userEmail}
+          onClose={handleCloseDetail}
+          onUpdate={handleEmployeeUpdate}
+        />
+      )}
     </div>
   );
 };
