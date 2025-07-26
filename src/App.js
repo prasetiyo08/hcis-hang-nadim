@@ -1,4 +1,4 @@
-// App.js - INTEGRATED WITH FIREBASE AUTH
+// App.js - FIXED IMPORT PATHS
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -8,11 +8,18 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
+
+// Components - FIXED PATHS
 import PusatInformasi from "./components/PusatInformasi";
 import Registration from "./components/Registration";
 import AdminDashboardMain from "./components/Dashboard/AdminDashboardMain";
 import AdminProfilePage from "./components/Profile/AdminProfilePage";
+import ExcelEmployeeUpload from "./components/ExcelEmployeeUpload";
+
+// Services
 import { AuthService } from "./services/authService";
+
+// Icons
 import {
   User,
   Lock,
@@ -24,106 +31,589 @@ import {
   Menu,
   X,
 } from "lucide-react";
+
+// Styles
 import "./App.css";
 
-// ===== MODULE COMPONENTS =====
-const ProfileModule = ({ userEmail }) => (
-  <div className="dashboard-content">
-    <AdminProfilePage userEmail={userEmail} />
-  </div>
-);
+// ===== LOGIN COMPONENT (INLINE UNTUK SEMENTARA) =====
+const Login = ({
+  onLogin,
+  loginForm,
+  setLoginForm,
+  loading,
+  showPassword,
+  setShowPassword,
+  fillDemoCredentials,
+  error,
+}) => {
+  const navigate = useNavigate();
 
-const LeaveModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">🏖️ Cuti & Izin</h1>
-    <div className="module-content">
-      <p>Module Cuti & Izin - Coming Soon!</p>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const success = await onLogin(e);
+    if (success) {
+      navigate("/dashboard");
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '1200px',
+        display: 'grid',
+        gridTemplateColumns: window.innerWidth > 768 ? '1fr 450px' : '1fr',
+        gap: '60px',
+        alignItems: 'center'
+      }}>
+        {/* LEFT SIDE - BRANDING & HERO */}
+        <div style={{ color: 'white' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            marginBottom: '40px'
+          }}>
+            <div style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              color: 'white',
+              letterSpacing: '-1px'
+            }}>
+              H<span style={{ color: '#06b6d4', margin: '0 -6px' }}>✈</span>NGNADIM
+            </div>
+            <div style={{
+              fontSize: '0.85rem',
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontWeight: '500',
+              borderLeft: '2px solid rgba(255, 255, 255, 0.3)',
+              paddingLeft: '20px',
+              lineHeight: '1.4'
+            }}>
+              BANDARA<br />
+              INTERNASIONAL<br />
+              BATAM
+            </div>
+          </div>
+
+          <h1 style={{
+            fontSize: window.innerWidth > 768 ? '3.5rem' : '2.5rem',
+            fontWeight: 'bold',
+            margin: '0 0 20px 0',
+            lineHeight: '1.1'
+          }}>
+            Human Capital
+            <br />
+            Information System
+          </h1>
+          <p style={{
+            fontSize: '1.2rem',
+            opacity: '0.95',
+            margin: '0 0 40px 0',
+            lineHeight: '1.6'
+          }}>
+            HCIS Hang Nadim Airport - Sistem informasi untuk mengelola data pegawai dan operasional bandara
+          </p>
+          
+          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+            <button style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              padding: '15px 30px',
+              borderRadius: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.3s ease'
+            }}>
+              Pelajari Lebih Lanjut
+            </button>
+            <button
+              onClick={() => navigate("/dashboard")}
+              style={{
+                background: 'transparent',
+                color: 'white',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                padding: '15px 30px',
+                borderRadius: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Lihat Dashboard
+            </button>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE - LOGIN FORM */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '24px',
+          padding: '40px',
+          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          width: '100%',
+          maxWidth: '450px',
+          margin: window.innerWidth <= 768 ? '0 auto' : '0'
+        }}>
+          {/* Form Header */}
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+            <div style={{
+              fontSize: '2.2rem',
+              fontWeight: 'bold',
+              color: '#2563eb',
+              marginBottom: '15px',
+              letterSpacing: '-1px'
+            }}>
+              H<span style={{ color: '#06b6d4', margin: '0 -6px' }}>✈</span>NGNADIM
+            </div>
+            <h2 style={{
+              fontSize: '1.8rem',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              margin: '0 0 8px 0'
+            }}>
+              Masuk ke HCIS
+            </h2>
+            <p style={{
+              color: '#6b7280',
+              margin: '0',
+              fontSize: '0.95rem'
+            }}>
+              Human Capital Information System
+            </p>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: '#fee2e2',
+              color: '#dc2626',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              marginBottom: '20px',
+              border: '1px solid #fecaca',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              <span>❌</span>
+              {error}
+            </div>
+          )}
+
+          {/* Role Selector */}
+          <div style={{
+            display: 'flex',
+            marginBottom: '25px',
+            background: '#f8fafc',
+            borderRadius: '16px',
+            padding: '6px',
+            boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.05)'
+          }}>
+            <button
+              type="button"
+              onClick={() => setLoginForm({ ...loginForm, role: "user" })}
+              style={{
+                flex: '1',
+                padding: '12px 16px',
+                border: 'none',
+                borderRadius: '12px',
+                background: loginForm.role === "user" ? 'white' : 'transparent',
+                color: loginForm.role === "user" ? '#2563eb' : '#6b7280',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                fontSize: '0.9rem',
+                boxShadow: loginForm.role === "user" ? '0 4px 12px rgba(37, 99, 235, 0.2)' : 'none',
+                transform: loginForm.role === "user" ? 'translateY(-1px)' : 'none'
+              }}
+            >
+              <UserCheck size={18} />
+              Employee
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoginForm({ ...loginForm, role: "admin" })}
+              style={{
+                flex: '1',
+                padding: '12px 16px',
+                border: 'none',
+                borderRadius: '12px',
+                background: loginForm.role === "admin" ? 'white' : 'transparent',
+                color: loginForm.role === "admin" ? '#2563eb' : '#6b7280',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                fontSize: '0.9rem',
+                boxShadow: loginForm.role === "admin" ? '0 4px 12px rgba(37, 99, 235, 0.2)' : 'none',
+                transform: loginForm.role === "admin" ? 'translateY(-1px)' : 'none'
+              }}
+            >
+              <Shield size={18} />
+              Administrator
+            </button>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
+          }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <label style={{
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#374151'
+              }}>
+                Email Address
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <User size={20} style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#9ca3af',
+                  zIndex: 1
+                }} />
+                <input
+                  type="email"
+                  name="email"
+                  value={loginForm.email}
+                  onChange={(e) =>
+                    setLoginForm({
+                      ...loginForm,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
+                  placeholder="Enter your email"
+                  style={{
+                    width: '100%',
+                    padding: '16px 16px 16px 50px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    transition: 'all 0.3s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    background: 'white'
+                  }}
+                  required
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2563eb';
+                    e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px'
+            }}>
+              <label style={{
+                fontSize: '0.9rem',
+                fontWeight: '600',
+                color: '#374151'
+              }}>
+                Password
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Lock size={20} style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#9ca3af',
+                  zIndex: 1
+                }} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={loginForm.password}
+                  onChange={(e) =>
+                    setLoginForm({
+                      ...loginForm,
+                      [e.target.name]: e.target.value,
+                    })
+                  }
+                  placeholder="Enter your password"
+                  style={{
+                    width: '100%',
+                    padding: '16px 50px 16px 50px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    transition: 'all 0.3s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    background: 'white'
+                  }}
+                  required
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2563eb';
+                    e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#9ca3af',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    borderRadius: '4px',
+                    zIndex: 1,
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              margin: '10px 0'
+            }}>
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '0.9rem',
+                color: '#6b7280',
+                cursor: 'pointer',
+                gap: '8px'
+              }}>
+                <input type="checkbox" style={{ width: 'auto', padding: 0, margin: 0 }} />
+                Remember me
+              </label>
+              <a href="#" style={{
+                fontSize: '0.9rem',
+                color: '#2563eb',
+                textDecoration: 'none',
+                fontWeight: '600',
+                transition: 'all 0.2s ease'
+              }}>
+                Forgot Password?
+              </a>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: loading ? '#9ca3af' : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                boxShadow: loading ? 'none' : '0 4px 15px rgba(37, 99, 235, 0.4)',
+                marginTop: '10px'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(37, 99, 235, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 15px rgba(37, 99, 235, 0.4)';
+                }
+              }}
+            >
+              {loading ? (
+                <>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    borderTop: '2px solid white',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}></div>
+                  Masuk...
+                </>
+              ) : (
+                <>
+                  <LogIn size={20} />
+                  Masuk ke Sistem
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Demo Credentials */}
+          <div style={{
+            marginTop: '30px',
+            padding: '20px',
+            background: '#f8fafc',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '12px',
+              textAlign: 'center',
+              fontSize: '0.9rem'
+            }}>
+              Demo Credentials:
+            </div>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
+            }}>
+              <button
+                type="button"
+                onClick={() => fillDemoCredentials("admin")}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                  color: '#374151',
+                  fontWeight: '500',
+                  width: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f0f9ff';
+                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.color = '#1e40af';
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'white';
+                  e.target.style.borderColor = '#e5e7eb';
+                  e.target.style.color = '#374151';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              >
+                <Shield size={16} />
+                Admin: admin@hangnadim.com / admin123
+              </button>
+              <button
+                type="button"
+                onClick={() => fillDemoCredentials("user")}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '10px',
+                  padding: '12px 16px',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                  color: '#374151',
+                  fontWeight: '500',
+                  width: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f0f9ff';
+                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.color = '#1e40af';
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'white';
+                  e.target.style.borderColor = '#e5e7eb';
+                  e.target.style.color = '#374151';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              >
+                <UserCheck size={16} />
+                User: user@hangnadim.com / user123
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CSS Animation */}
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
     </div>
-  </div>
-);
+  );
+};
 
-const PayrollModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">💰 Penggajian</h1>
-    <div className="module-content">
-      <p>Module Penggajian - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const PerformanceModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">📈 Penilaian Kinerja</h1>
-    <div className="module-content">
-      <p>Module Penilaian Kinerja - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const TrainingModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">🎓 Pelatihan</h1>
-    <div className="module-content">
-      <p>Module Pelatihan - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const CommunicationModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">💬 Komunikasi</h1>
-    <div className="module-content">
-      <p>Module Komunikasi - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const DocumentsModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">📄 Dokumen</h1>
-    <div className="module-content">
-      <p>Module Dokumen - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const AttendanceModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">⏰ Absensi</h1>
-    <div className="module-content">
-      <p>Module Absensi - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const EmployeeManagementModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">👥 Manajemen Karyawan</h1>
-    <div className="module-content">
-      <p>Module Manajemen Karyawan - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const AnalyticsModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">📊 Analytics & Reports</h1>
-    <div className="module-content">
-      <p>Module Analytics - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-const SettingsModule = () => (
-  <div className="dashboard-module">
-    <h1 className="module-title">⚙️ Pengaturan Sistem</h1>
-    <div className="module-content">
-      <p>Module Settings - Coming Soon!</p>
-    </div>
-  </div>
-);
-
-// ===== UNIFIED NAVIGATION COMPONENT =====
+// ===== NAVIGATION COMPONENT =====
 const UnifiedNavigation = ({
   userRole,
   userEmail,
@@ -134,38 +624,26 @@ const UnifiedNavigation = ({
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Check if current path is dashboard related
   const isDashboardPage = location.pathname.startsWith("/dashboard");
 
-  // Navigation items berdasarkan role untuk sidebar
+  // Simplified sidebar items
   const sidebarItems = {
     user: [
-      { icon: "🔵🏠", label: "Dashboard", path: "/dashboard" },
-      { icon: "🔵👤", label: "Profil Saya", path: "/dashboard/profile" },
-      { icon: "🔵⏰", label: "Absensi", path: "/dashboard/attendance" },
-      { icon: "🔵🏖️", label: "Cuti & Izin", path: "/dashboard/leave" },
-      { icon: "🔵💰", label: "Penggajian", path: "/dashboard/payroll" },
-      {
-        icon: "🔵📈",
-        label: "Penilaian Kinerja",
-        path: "/dashboard/performance",
-      },
-      { icon: "🔵🎓", label: "Pelatihan", path: "/dashboard/training" },
-      { icon: "🔵💬", label: "Komunikasi", path: "/dashboard/communication" },
-      { icon: "🔵📄", label: "Dokumen", path: "/dashboard/documents" },
+      { icon: "🏠", label: "Dashboard", path: "/dashboard" },
+      { icon: "👤", label: "Profil Saya", path: "/dashboard/profile" },
+      { icon: "📄", label: "Dokumen", path: "/dashboard/documents" },
     ],
     admin: [
-      { icon: "🔵🏠", label: "Admin Dashboard", path: "/dashboard" },
-      { icon: "🔵👤", label: "Profile Admin", path: "/dashboard/admin-profile" },
-      { icon: "🔵👥", label: "Manajemen Karyawan", path: "/dashboard/employees" },
-      { icon: "🔵📊", label: "Analytics", path: "/dashboard/analytics" },
-      { icon: "🔵⚙️", label: "Settings", path: "/dashboard/settings" },
+      { icon: "🏠", label: "Admin Dashboard", path: "/dashboard" },
+      { icon: "👤", label: "Profile Admin", path: "/dashboard/admin-profile" },
+      { icon: "👥", label: "Manajemen Karyawan", path: "/dashboard/employees" },
+      { icon: "📊", label: "Upload Excel", path: "/dashboard/excel-upload" },
+      { icon: "⚙️", label: "Settings", path: "/dashboard/settings" },
     ],
   };
 
   const navItems = sidebarItems[userRole] || sidebarItems.user;
 
-  // Check if current path is active
   const isActivePath = (path) => {
     if (path === "/dashboard") {
       return location.pathname === "/dashboard";
@@ -188,10 +666,9 @@ const UnifiedNavigation = ({
               <button
                 className="mobile-menu-button"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                style={{ marginRight: "15px" }}
                 title="Open Menu"
               >
-                <Menu size={20} />
+                <Menu size={24} />
               </button>
             )}
 
@@ -236,14 +713,25 @@ const UnifiedNavigation = ({
                 </button>
 
                 {userRole === "admin" && (
-                  <button
-                    onClick={() => navigate("/registration")}
-                    className={`nav-button ${
-                      location.pathname === "/registration" ? "active" : ""
-                    }`}
-                  >
-                    📝 Daftar Pegawai
-                  </button>
+                  <>
+                    <button
+                      onClick={() => navigate("/registration")}
+                      className={`nav-button ${
+                        location.pathname === "/registration" ? "active" : ""
+                      }`}
+                    >
+                      Daftar Pegawai
+                    </button>
+                    
+                    <button
+                      onClick={() => navigate("/dashboard/excel-upload")}
+                      className={`nav-button ${
+                        location.pathname === "/dashboard/excel-upload" ? "active" : ""
+                      }`}
+                    >
+                      Upload Excel
+                    </button>
+                  </>
                 )}
               </>
             )}
@@ -274,7 +762,7 @@ const UnifiedNavigation = ({
           >
             <div className="sidebar-header">
               <div className="sidebar-title">
-                {userRole === 'admin' ? '🔧 Admin Panel' : '📊 Dashboard Modules'}
+                {userRole === 'admin' ? 'Admin Panel' : 'Dashboard Modules'}
               </div>
               <button
                 className="sidebar-close"
@@ -339,219 +827,9 @@ const UnifiedNavigation = ({
   );
 };
 
-// ===== LOGIN PAGE COMPONENT =====
-const LoginPage = ({
-  onLogin,
-  loginForm,
-  setLoginForm,
-  loading,
-  showPassword,
-  setShowPassword,
-  fillDemoCredentials,
-  error,
-}) => {
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("🔄 Login form submitted");
-
-    const success = await onLogin(e);
-    if (success) {
-      console.log("✅ Login successful, navigating to dashboard...");
-      navigate("/dashboard");
-    }
-  };
-
-  return (
-    <div className="main-container">
-      <div className="login-layout">
-        <div className="login-left-content">
-          <h1 className="login-title">
-            Human Capital
-            <br />
-            Information System
-          </h1>
-          <p className="login-subtitle">
-            HCIS Hang Nadim Airport memberikan kesempatan bagi seluruh insan
-            bandara untuk belajar, bertumbuh, dan berkontribusi untuk Indonesia
-          </p>
-          <div className="login-buttons">
-            <button className="btn-primary">Daftar Sekarang</button>
-            <button
-              className="btn-secondary"
-              onClick={() => navigate("/dashboard")}
-            >
-              Lihat Dashboard
-            </button>
-          </div>
-        </div>
-
-        <div className="login-form-container">
-          <div
-            className="logo-text"
-            style={{
-              fontSize: "2.5rem",
-              textAlign: "center",
-              marginBottom: "20px",
-            }}
-          >
-            H<span className="logo-plane">✈</span>NGNADIM
-          </div>
-
-          <div style={{ textAlign: "center", marginBottom: "30px" }}>
-            <h2 className="form-title">Masuk ke HCIS</h2>
-            <p className="form-subtitle">Human Capital Information System</p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div style={{
-              background: '#fee2e2',
-              color: '#dc2626',
-              padding: '12px',
-              borderRadius: '8px',
-              marginBottom: '20px',
-              border: '1px solid #fecaca',
-              fontSize: '14px'
-            }}>
-              ❌ {error}
-            </div>
-          )}
-
-          <div className="role-selector">
-            <button
-              onClick={() => setLoginForm({ ...loginForm, role: "user" })}
-              className={`role-button ${
-                loginForm.role === "user" ? "active" : ""
-              }`}
-            >
-              <UserCheck size={18} />
-              Employee
-            </button>
-            <button
-              onClick={() => setLoginForm({ ...loginForm, role: "admin" })}
-              className={`role-button ${
-                loginForm.role === "admin" ? "active" : ""
-              }`}
-            >
-              <Shield size={18} />
-              Administrator
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <div className="input-wrapper">
-                <User size={20} className="input-icon" />
-                <input
-                  type="email"
-                  name="email"
-                  value={loginForm.email}
-                  onChange={(e) =>
-                    setLoginForm({
-                      ...loginForm,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  placeholder="Enter your email"
-                  className="form-input"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <div className="input-wrapper">
-                <Lock size={20} className="input-icon" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={loginForm.password}
-                  onChange={(e) =>
-                    setLoginForm({
-                      ...loginForm,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  placeholder="Enter your password"
-                  className="form-input password-input"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="form-options">
-              <label className="checkbox-label">
-                <input type="checkbox" />
-                Remember me
-              </label>
-              <a href="#" className="forgot-link">
-                Forgot Password?
-              </a>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="login-button"
-              style={{
-                background: loading
-                  ? "#9ca3af"
-                  : "linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)",
-                cursor: loading ? "not-allowed" : "pointer",
-              }}
-            >
-              {loading ? (
-                <>
-                  <div className="loading-spinner"></div>
-                  Masuk...
-                </>
-              ) : (
-                <>
-                  <LogIn size={20} />
-                  Masuk ke Sistem
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="demo-credentials">
-            <div className="demo-title">Demo Credentials:</div>
-            <div className="demo-info">
-              <button
-                type="button"
-                onClick={() => fillDemoCredentials("admin")}
-                className="demo-button"
-              >
-                👨‍💼 Admin: admin@hangnadim.com / admin123
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemoCredentials("user")}
-                className="demo-button"
-              >
-                👤 User: user@hangnadim.com / user123
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // ===== MAIN APP COMPONENT =====
 const App = () => {
+  // Login form state
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
@@ -562,15 +840,15 @@ const App = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // User state from Firebase
+  // User state
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Computed values from user object
+  // Computed values
   const userRole = user?.role || "user";
   const userEmail = user?.email || "";
 
-  // Initialize Firebase Auth listener
+  // Initialize Firebase Auth
   useEffect(() => {
     console.log("🔄 Setting up Firebase Auth listener...");
     
@@ -594,16 +872,10 @@ const App = () => {
       setAuthLoading(false);
     });
 
-    // Create demo accounts in development
-    if (process.env.NODE_ENV === "development") {
-      AuthService.createDemoAccounts().catch(error => {
-        console.warn("⚠️ Demo accounts creation failed:", error);
-      });
-    }
-
     return unsubscribe;
   }, []);
 
+  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     console.log("🚀 Login process started");
@@ -632,6 +904,7 @@ const App = () => {
     }
   };
 
+  // Handle logout
   const handleLogout = async () => {
     console.log("🚪 Logout initiated");
     
@@ -646,6 +919,7 @@ const App = () => {
     }
   };
 
+  // Fill demo credentials
   const fillDemoCredentials = (type) => {
     const demoAccounts = AuthService.getDemoAccounts();
     
@@ -696,14 +970,23 @@ const App = () => {
       <div className="dashboard-module">
         <h1 className="module-title">Employee Management</h1>
         <div className="module-content">
-          <p>Halaman Employee Management sedang dalam pengembangan...</p>
-          <p>
-            User: {userEmail} | Role: {userRole}
-          </p>
+          <p>Halaman Employee Management</p>
+          <p>User: {userEmail} | Role: {userRole}</p>
         </div>
       </div>
     </div>
   );
+
+  // Create demo accounts manually when needed
+  const createDemoAccountsManually = async () => {
+    try {
+      console.log("🔄 Creating demo accounts manually...");
+      await AuthService.createDemoAccounts();
+      console.log("✅ Demo accounts created successfully");
+    } catch (error) {
+      console.error("❌ Failed to create demo accounts:", error);
+    }
+  };
 
   console.log("🎯 App render state:", { 
     isAuthenticated, 
@@ -727,6 +1010,22 @@ const App = () => {
       }}>
         <div className="loading-spinner" style={{ width: '50px', height: '50px' }}></div>
         <p>Initializing HCIS...</p>
+        
+        {/* Manual demo account creation button */}
+        <button 
+          onClick={createDemoAccountsManually}
+          style={{
+            marginTop: '1rem',
+            padding: '0.5rem 1rem',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          Create Demo Accounts
+        </button>
       </div>
     );
   }
@@ -751,7 +1050,7 @@ const App = () => {
                 isAuthenticated ? (
                   <Navigate to="/dashboard" replace />
                 ) : (
-                  <LoginPage
+                  <Login
                     onLogin={handleLogin}
                     loginForm={loginForm}
                     setLoginForm={setLoginForm}
@@ -771,7 +1070,7 @@ const App = () => {
                 isAuthenticated ? (
                   <Navigate to="/dashboard" replace />
                 ) : (
-                  <LoginPage
+                  <Login
                     onLogin={handleLogin}
                     loginForm={loginForm}
                     setLoginForm={setLoginForm}
@@ -807,94 +1106,14 @@ const App = () => {
               }
             />
 
-            {/* Module Routes - Available for all users */}
+            {/* Excel Upload Route */}
             <Route
-              path="/dashboard/profile"
+              path="/dashboard/excel-upload"
               element={
                 <ProtectedRoute>
-                  <ProfileModule userEmail={userEmail} />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/attendance"
-              element={
-                <ProtectedRoute>
-                  <AttendanceModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/leave"
-              element={
-                <ProtectedRoute>
-                  <LeaveModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/payroll"
-              element={
-                <ProtectedRoute>
-                  <PayrollModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/performance"
-              element={
-                <ProtectedRoute>
-                  <PerformanceModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/training"
-              element={
-                <ProtectedRoute>
-                  <TrainingModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/communication"
-              element={
-                <ProtectedRoute>
-                  <CommunicationModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/documents"
-              element={
-                <ProtectedRoute>
-                  <DocumentsModule />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Admin Routes */}
-            <Route
-              path="/dashboard/employees"
-              element={
-                <ProtectedRoute>
-                  <EmployeeManagementModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/analytics"
-              element={
-                <ProtectedRoute>
-                  <AnalyticsModule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/settings"
-              element={
-                <ProtectedRoute>
-                  <SettingsModule />
+                  <div className="dashboard-content">
+                    <ExcelEmployeeUpload userRole={userRole} userEmail={userEmail} />
+                  </div>
                 </ProtectedRoute>
               }
             />
@@ -910,6 +1129,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/employee"
               element={
@@ -918,6 +1138,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/registration"
               element={
