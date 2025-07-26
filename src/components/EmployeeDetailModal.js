@@ -1,4 +1,4 @@
-// src/components/EmployeeDetailModal.js - Premium Enhanced Version
+// src/components/EmployeeDetailModal.js - Enhanced & Improved Version
 import React, { useState, useEffect } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -22,7 +22,11 @@ import {
   AlertCircle,
   Copy,
   Download,
-  Share2
+  Share2,
+  Clock,
+  Award,
+  FileText,
+  Settings
 } from 'lucide-react';
 import './EmployeeDetailModal.css';
 
@@ -61,7 +65,7 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
   const formatFieldName = (fieldName) => {
     if (!fieldName) return '';
     
-    // Special field name mappings
+    // Enhanced field name mappings
     const fieldMappings = {
       'fullName': 'Nama Lengkap',
       'birthPlace': 'Tempat Lahir',
@@ -70,7 +74,14 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
       'employmentType': 'Status Karyawan',
       'joinDate': 'Tanggal Bergabung',
       'emergencyContact': 'Kontak Darurat',
-      'emergencyName': 'Nama Kontak Darurat'
+      'emergencyName': 'Nama Kontak Darurat',
+      'emergencyRelation': 'Hubungan Kontak Darurat',
+      'workLocation': 'Lokasi Kerja',
+      'workShift': 'Shift Kerja',
+      'bloodType': 'Golongan Darah',
+      'spouseName': 'Nama Pasangan',
+      'spouseOccupation': 'Pekerjaan Pasangan',
+      'numberOfChildren': 'Jumlah Anak'
     };
     
     if (fieldMappings[fieldName]) {
@@ -186,7 +197,16 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
       telepon: editData.phone,
       alamat: editData.address,
       tanggalBergabung: editData.joinDate,
-      gaji: editData.salary
+      gaji: editData.salary,
+      nik: editData.nik,
+      tempatLahir: editData.birthPlace,
+      tanggalLahir: editData.birthDate,
+      jenisKelamin: editData.gender,
+      agama: editData.religion,
+      statusPernikahan: editData.maritalStatus,
+      kontakDarurat: editData.emergencyContact,
+      namaKontakDarurat: editData.emergencyName,
+      hubunganKontakDarurat: editData.emergencyRelation
     };
     
     const dataStr = JSON.stringify(exportData, null, 2);
@@ -201,12 +221,14 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
     setMessage('✅ Data pegawai berhasil diekspor!');
   };
 
-  // Tab definitions with enhanced icons
+  // Enhanced tab definitions with more icons and colors
   const tabs = [
     { id: 'personal', label: 'Data Personal', icon: User, color: '#3b82f6' },
     { id: 'work', label: 'Data Pekerjaan', icon: Briefcase, color: '#10b981' },
     { id: 'contact', label: 'Kontak & Alamat', icon: Phone, color: '#f59e0b' },
-    { id: 'additional', label: 'Informasi Tambahan', icon: Users, color: '#8b5cf6' }
+    { id: 'family', label: 'Data Keluarga', icon: Heart, color: '#ef4444' },
+    { id: 'education', label: 'Pendidikan', icon: GraduationCap, color: '#8b5cf6' },
+    { id: 'additional', label: 'Info Tambahan', icon: FileText, color: '#06b6d4' }
   ];
 
   // Enhanced field categorization
@@ -234,13 +256,31 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
     return contactFields.filter(field => editData[field] !== undefined && editData[field] !== '');
   };
 
+  const getFamilyFields = () => {
+    const familyFields = [
+      'spouseName', 'spouseOccupation', 'numberOfChildren', 
+      'fatherName', 'motherName'
+    ];
+    return familyFields.filter(field => editData[field] !== undefined && editData[field] !== '');
+  };
+
+  const getEducationFields = () => {
+    const educationFields = [
+      'education', 'lastEducation', 'institution', 'graduationYear', 'gpa'
+    ];
+    return educationFields.filter(field => editData[field] !== undefined && editData[field] !== '');
+  };
+
   const getAdditionalFields = () => {
     const standardFields = [
       'id', 'fullName', 'email', 'phone', 'department', 'position', 'address', 
       'joinDate', 'employmentType', 'salary', 'nik', 'createdAt', 'updatedAt', 
       'createdBy', 'source', 'status', 'birthPlace', 'birthDate', 'gender', 
       'religion', 'bloodType', 'nationality', 'maritalStatus', 'supervisor', 
-      'workLocation', 'emergencyContact', 'emergencyName', 'emergencyRelation', 'workShift'
+      'workLocation', 'emergencyContact', 'emergencyName', 'emergencyRelation', 
+      'workShift', 'spouseName', 'spouseOccupation', 'numberOfChildren', 
+      'fatherName', 'motherName', 'education', 'lastEducation', 'institution', 
+      'graduationYear', 'gpa'
     ];
     
     return Object.keys(editData).filter(key => 
@@ -273,9 +313,13 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
               border: 'none',
               color: '#3b82f6',
               cursor: 'pointer',
-              padding: '0.25rem'
+              padding: '0.25rem',
+              borderRadius: '4px',
+              transition: 'all 0.2s ease'
             }}
             title="Salin email"
+            onMouseEnter={(e) => e.target.style.background = '#f0f9ff'}
+            onMouseLeave={(e) => e.target.style.background = 'none'}
           >
             <Copy size={14} />
           </button>
@@ -294,9 +338,13 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
               border: 'none',
               color: '#3b82f6',
               cursor: 'pointer',
-              padding: '0.25rem'
+              padding: '0.25rem',
+              borderRadius: '4px',
+              transition: 'all 0.2s ease'
             }}
             title="Salin nomor telepon"
+            onMouseEnter={(e) => e.target.style.background = '#f0f9ff'}
+            onMouseLeave={(e) => e.target.style.background = 'none'}
           >
             <Copy size={14} />
           </button>
@@ -315,7 +363,9 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
         religion: ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'],
         employmentType: ['Permanent', 'Contract', 'Temporary', 'Intern'],
         maritalStatus: ['Belum Menikah', 'Menikah', 'Cerai', 'Janda/Duda'],
-        workShift: ['Pagi (06:00-14:00)', 'Siang (14:00-22:00)', 'Malam (22:00-06:00)', 'Normal (08:00-17:00)']
+        workShift: ['Pagi (06:00-14:00)', 'Siang (14:00-22:00)', 'Malam (22:00-06:00)', 'Normal (08:00-17:00)'],
+        bloodType: ['A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+        emergencyRelation: ['Orang Tua', 'Pasangan', 'Anak', 'Saudara', 'Teman', 'Lainnya']
       };
       
       return (
@@ -340,6 +390,7 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
           className="form-input"
           rows={3}
           placeholder={`Masukkan ${formatFieldName(field).toLowerCase()}`}
+          style={{ resize: 'vertical', minHeight: '120px' }}
         />
       );
     }
@@ -384,20 +435,6 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
               onClick={exportEmployeeData}
               className="btn-export"
               title="Ekspor Data"
-              style={{
-                padding: '1rem',
-                border: 'none',
-                borderRadius: '16px',
-                cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)',
-                color: '#7c3aed',
-                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.2)',
-                border: '1px solid rgba(124, 58, 237, 0.1)'
-              }}
             >
               <Download size={20} />
             </button>
@@ -469,7 +506,7 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
                     <label>{formatFieldName(field)}</label>
                     {isEditing ? 
                       renderEditableField(field, editData[field], 
-                        ['gender', 'religion', 'maritalStatus'].includes(field) ? 'select' : 
+                        ['gender', 'religion', 'maritalStatus', 'bloodType'].includes(field) ? 'select' : 
                         field.includes('date') ? 'date' : 'text'
                       ) :
                       <span>{renderFieldValue(field, editData[field])}</span>
@@ -532,7 +569,8 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
                       renderEditableField(field, editData[field], 
                         field === 'address' ? 'textarea' :
                         field === 'email' ? 'email' :
-                        field.includes('phone') || field.includes('Contact') ? 'tel' : 'text'
+                        field.includes('phone') || field.includes('Contact') ? 'tel' :
+                        field === 'emergencyRelation' ? 'select' : 'text'
                       ) :
                       <span>{renderFieldValue(field, editData[field])}</span>
                     }
@@ -549,10 +587,75 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
             </div>
           )}
 
+          {activeTab === 'family' && (
+            <div className="tab-content">
+              <h3 className="section-title">
+                <Heart size={24} />
+                Informasi Keluarga
+              </h3>
+              {getFamilyFields().length > 0 ? (
+                <div className="info-grid">
+                  {getFamilyFields().map(field => (
+                    <div key={field} className="info-item-detail">
+                      <label>{formatFieldName(field)}</label>
+                      {isEditing ? 
+                        renderEditableField(field, editData[field], 
+                          field === 'numberOfChildren' ? 'number' : 'text'
+                        ) :
+                        <span>{renderFieldValue(field, editData[field])}</span>
+                      }
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-additional-info">
+                  <Heart size={48} />
+                  <p>Tidak ada informasi keluarga yang tersedia</p>
+                  <small style={{ color: '#94a3b8', marginTop: '0.5rem' }}>
+                    Informasi keluarga akan muncul dari data Excel yang diupload
+                  </small>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'education' && (
+            <div className="tab-content">
+              <h3 className="section-title">
+                <GraduationCap size={24} />
+                Riwayat Pendidikan
+              </h3>
+              {getEducationFields().length > 0 ? (
+                <div className="info-grid">
+                  {getEducationFields().map(field => (
+                    <div key={field} className="info-item-detail">
+                      <label>{formatFieldName(field)}</label>
+                      {isEditing ? 
+                        renderEditableField(field, editData[field], 
+                          field === 'graduationYear' ? 'number' :
+                          field === 'gpa' ? 'number' : 'text'
+                        ) :
+                        <span>{renderFieldValue(field, editData[field])}</span>
+                      }
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-additional-info">
+                  <GraduationCap size={48} />
+                  <p>Tidak ada informasi pendidikan yang tersedia</p>
+                  <small style={{ color: '#94a3b8', marginTop: '0.5rem' }}>
+                    Informasi pendidikan akan muncul dari data Excel yang diupload
+                  </small>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === 'additional' && (
             <div className="tab-content">
               <h3 className="section-title">
-                <Users size={24} />
+                <FileText size={24} />
                 Informasi Tambahan
               </h3>
               {getAdditionalFields().length > 0 ? (
@@ -569,7 +672,7 @@ const EmployeeDetailModal = ({ employee, userRole, userEmail, onClose, onUpdate 
                 </div>
               ) : (
                 <div className="no-additional-info">
-                  <Users size={48} />
+                  <FileText size={48} />
                   <p>Tidak ada informasi tambahan yang tersedia</p>
                   <small style={{ color: '#94a3b8', marginTop: '0.5rem' }}>
                     Informasi tambahan akan muncul dari data Excel yang diupload
