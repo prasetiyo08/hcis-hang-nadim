@@ -1,14 +1,14 @@
 // src/components/EmployeeListPage.js - Horizontal Layout Version
-import React, { useState, useEffect } from 'react';
-import { 
-  collection, 
-  getDocs, 
-  doc, 
+import React, { useState, useEffect } from "react";
+import {
+  collection,
+  getDocs,
+  doc,
   deleteDoc,
   query,
-  orderBy 
-} from 'firebase/firestore';
-import { db } from '../services/firebase';
+  orderBy,
+} from "firebase/firestore";
+import { db } from "../services/firebase";
 import {
   Users,
   Search,
@@ -23,24 +23,22 @@ import {
   Mail,
   Phone,
   Building,
-  Grid,
-  List,
-  Eye
-} from 'lucide-react';
-import EmployeeDetailModal from './EmployeeDetailModal';
-import './EmployeeListPage.css';
+  Eye,
+} from "lucide-react";
+import EmployeeDetailModal from "./EmployeeDetailModal";
+import "./EmployeeListPage.css";
 
 const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
   const [employees, setEmployees] = useState([]);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterDepartment, setFilterDepartment] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDepartment, setFilterDepartment] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState("table");
   const [showFilters, setShowFilters] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   // Load employees data
   useEffect(() => {
@@ -55,29 +53,28 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
   const loadEmployees = async () => {
     setLoading(true);
     try {
-      console.log('📋 Loading employees from Firestore...');
-      
+      console.log("📋 Loading employees from Firestore...");
+
       const q = query(
-        collection(db, 'employees'),
-        orderBy('createdAt', 'desc')
+        collection(db, "employees"),
+        orderBy("createdAt", "desc")
       );
-      
+
       const querySnapshot = await getDocs(q);
       const employeeData = [];
-      
+
       querySnapshot.forEach((doc) => {
         employeeData.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         });
       });
 
       console.log(`✅ Loaded ${employeeData.length} employees`);
       setEmployees(employeeData);
-      
     } catch (error) {
-      console.error('❌ Error loading employees:', error);
-      setMessage('❌ Gagal memuat data pegawai: ' + error.message);
+      console.error("❌ Error loading employees:", error);
+      setMessage("❌ Gagal memuat data pegawai: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -89,54 +86,60 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
     // Search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(emp => 
-        emp.fullName?.toLowerCase().includes(search) ||
-        emp.email?.toLowerCase().includes(search) ||
-        emp.department?.toLowerCase().includes(search) ||
-        emp.position?.toLowerCase().includes(search) ||
-        emp.nik?.includes(search)
+      filtered = filtered.filter(
+        (emp) =>
+          emp.fullName?.toLowerCase().includes(search) ||
+          emp.email?.toLowerCase().includes(search) ||
+          emp.department?.toLowerCase().includes(search) ||
+          emp.position?.toLowerCase().includes(search) ||
+          emp.nik?.includes(search)
       );
     }
 
     // Department filter
     if (filterDepartment) {
-      filtered = filtered.filter(emp => emp.department === filterDepartment);
+      filtered = filtered.filter((emp) => emp.department === filterDepartment);
     }
 
     setFilteredEmployees(filtered);
   };
 
   const getDepartments = () => {
-    const departments = [...new Set(employees.map(emp => emp.department).filter(Boolean))];
+    const departments = [
+      ...new Set(employees.map((emp) => emp.department).filter(Boolean)),
+    ];
     return departments.sort();
   };
 
   const handleDelete = async (employeeId, employeeName) => {
-    if (userRole !== 'admin') {
-      setMessage('❌ Hanya admin yang bisa menghapus data pegawai');
+    if (userRole !== "admin") {
+      setMessage("❌ Hanya admin yang bisa menghapus data pegawai");
       return;
     }
 
     const confirmDelete = window.confirm(
-      `Apakah Anda yakin ingin menghapus data pegawai "${capitalizeWords(employeeName)}"?\n\nTindakan ini tidak dapat dibatalkan.`
+      `Apakah Anda yakin ingin menghapus data pegawai "${capitalizeWords(
+        employeeName
+      )}"?\n\nTindakan ini tidak dapat dibatalkan.`
     );
 
     if (!confirmDelete) return;
 
     try {
-      console.log('🗑️ Deleting employee:', employeeId);
-      
-      await deleteDoc(doc(db, 'employees', employeeId));
-      
-      // Remove from local state
-      setEmployees(prev => prev.filter(emp => emp.id !== employeeId));
-      
-      setMessage(`✅ Data pegawai "${capitalizeWords(employeeName)}" berhasil dihapus`);
-      setTimeout(() => setMessage(''), 3000);
+      console.log("🗑️ Deleting employee:", employeeId);
 
+      await deleteDoc(doc(db, "employees", employeeId));
+
+      // Remove from local state
+      setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId));
+
+      setMessage(
+        `✅ Data pegawai "${capitalizeWords(employeeName)}" berhasil dihapus`
+      );
+      setTimeout(() => setMessage(""), 3000);
     } catch (error) {
-      console.error('❌ Error deleting employee:', error);
-      setMessage('❌ Gagal menghapus data: ' + error.message);
+      console.error("❌ Error deleting employee:", error);
+      setMessage("❌ Gagal menghapus data: " + error.message);
     }
   };
 
@@ -151,18 +154,16 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
   };
 
   const handleEmployeeUpdate = (updatedEmployee) => {
-    setEmployees(prev => 
-      prev.map(emp => 
-        emp.id === updatedEmployee.id ? updatedEmployee : emp
-      )
+    setEmployees((prev) =>
+      prev.map((emp) => (emp.id === updatedEmployee.id ? updatedEmployee : emp))
     );
-    setMessage('✅ Data pegawai berhasil diupdate!');
-    setTimeout(() => setMessage(''), 3000);
+    setMessage("✅ Data pegawai berhasil diupdate!");
+    setTimeout(() => setMessage(""), 3000);
   };
 
   // Utility function to capitalize words properly
   const capitalizeWords = (str) => {
-    if (!str) return '';
+    if (!str) return "";
     return str.replace(/\b\w+/g, (word) => {
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     });
@@ -170,30 +171,28 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
 
   // Get employee initials for avatar
   const getInitials = (name) => {
-    if (!name) return 'N/A';
+    if (!name) return "N/A";
     return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
 
   const renderEmployeeCard = (employee) => (
     <div key={employee.id} className="employee-card-horizontal">
-      <div className="employee-avatar">
-        {getInitials(employee.fullName)}
-      </div>
-      
+      <div className="employee-avatar">{getInitials(employee.fullName)}</div>
+
       <div className="employee-info">
         <h3 className="employee-name">
-          {capitalizeWords(employee.fullName) || 'Nama Tidak Tersedia'}
+          {capitalizeWords(employee.fullName) || "Nama Tidak Tersedia"}
         </h3>
         <p className="employee-position">
-          {capitalizeWords(employee.position) || 'Posisi Tidak Tersedia'}
+          {capitalizeWords(employee.position) || "Posisi Tidak Tersedia"}
         </p>
         <p className="employee-department">
-          {capitalizeWords(employee.department) || 'Departemen Tidak Tersedia'}
+          {capitalizeWords(employee.department) || "Departemen Tidak Tersedia"}
         </p>
         <p className="employee-contact">
           <Mail size={12} />
@@ -209,7 +208,7 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
         >
           <Eye size={16} />
         </button>
-        {userRole === 'admin' && (
+        {userRole === "admin" && (
           <>
             <button
               onClick={() => handleDelete(employee.id, employee.fullName)}
@@ -239,8 +238,12 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredEmployees.map(employee => (
-            <tr key={employee.id} onClick={() => handleViewDetail(employee)} className="table-row-clickable">
+          {filteredEmployees.map((employee) => (
+            <tr
+              key={employee.id}
+              onClick={() => handleViewDetail(employee)}
+              className="table-row-clickable"
+            >
               <td>
                 <div className="table-employee-avatar">
                   {getInitials(employee.fullName)}
@@ -255,9 +258,12 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
               <td>{capitalizeWords(employee.position)}</td>
               <td>{capitalizeWords(employee.department)}</td>
               <td>{employee.email}</td>
-              <td>{employee.phone || '-'}</td>
+              <td>{employee.phone || "-"}</td>
               <td>
-                <div className="table-actions" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="table-actions"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={() => handleViewDetail(employee)}
                     className="btn-view-small"
@@ -265,9 +271,11 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
                   >
                     <Eye size={14} />
                   </button>
-                  {userRole === 'admin' && (
+                  {userRole === "admin" && (
                     <button
-                      onClick={() => handleDelete(employee.id, employee.fullName)}
+                      onClick={() =>
+                        handleDelete(employee.id, employee.fullName)
+                      }
                       className="btn-delete-small"
                       title="Hapus Pegawai"
                     >
@@ -303,19 +311,15 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
           <div>
             <h1>Data Pegawai</h1>
             <p>
-              {userRole === 'admin' 
-                ? 'Kelola Data Pegawai Perusahaan' 
-                : 'Lihat Data Pegawai Perusahaan'
-              }
+              {userRole === "admin"
+                ? "Kelola Data Pegawai Perusahaan"
+                : "Lihat Data Pegawai Perusahaan"}
             </p>
           </div>
         </div>
         <div className="header-actions">
-          {userRole === 'admin' && (
-            <button
-              onClick={onNavigateToUpload}
-              className="btn-primary"
-            >
+          {userRole === "admin" && (
+            <button onClick={onNavigateToUpload} className="btn-primary">
               <Upload size={16} />
               Upload Excel
             </button>
@@ -325,14 +329,20 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
 
       {/* Message */}
       {message && (
-        <div className={`message ${message.includes('✅') ? 'success' : 'error'}`}>
-          {message.includes('✅') ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+        <div
+          className={`message ${message.includes("✅") ? "success" : "error"}`}
+        >
+          {message.includes("✅") ? (
+            <CheckCircle size={16} />
+          ) : (
+            <AlertCircle size={16} />
+          )}
           {message}
         </div>
       )}
 
-      {/* Controls */}
-      <div className="controls-section">
+      {/* Controls - Simplified */}
+      <div className="controls-section-minimal">
         <div className="search-controls">
           <div className="search-box">
             <Search size={16} />
@@ -343,32 +353,13 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`filter-toggle ${showFilters ? 'active' : ''}`}
+            className={`filter-toggle ${showFilters ? "active" : ""}`}
           >
             <Filter size={16} />
             Filter
-          </button>
-        </div>
-
-        <div className="view-controls">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-            title="Tampilan Card"
-          >
-            <Grid size={16} />
-            Card
-          </button>
-          <button
-            onClick={() => setViewMode('table')}
-            className={`view-btn ${viewMode === 'table' ? 'active' : ''}`}
-            title="Tampilan Tabel"
-          >
-            <List size={16} />
-            Tabel
           </button>
         </div>
       </div>
@@ -383,31 +374,15 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
               onChange={(e) => setFilterDepartment(e.target.value)}
             >
               <option value="">Semua Departemen</option>
-              {getDepartments().map(dept => (
-                <option key={dept} value={dept}>{capitalizeWords(dept)}</option>
+              {getDepartments().map((dept) => (
+                <option key={dept} value={dept}>
+                  {capitalizeWords(dept)}
+                </option>
               ))}
             </select>
           </div>
         </div>
       )}
-
-      {/* Stats */}
-      <div className="stats-section">
-        <div className="stat-card">
-          <Users size={24} />
-          <div>
-            <h3>{filteredEmployees.length}</h3>
-            <p>Total Pegawai</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <Building size={24} />
-          <div>
-            <h3>{getDepartments().length}</h3>
-            <p>Departemen</p>
-          </div>
-        </div>
-      </div>
 
       {/* Employee List */}
       {filteredEmployees.length === 0 ? (
@@ -415,31 +390,19 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
           <Users size={64} />
           <h3>Belum Ada Data Pegawai</h3>
           <p>
-            {employees.length === 0 
-              ? 'Belum ada pegawai yang terdaftar dalam sistem'
-              : 'Tidak ada pegawai yang sesuai dengan filter yang dipilih'
-            }
+            {employees.length === 0
+              ? "Belum ada pegawai yang terdaftar dalam sistem"
+              : "Tidak ada pegawai yang sesuai dengan filter yang dipilih"}
           </p>
-          {userRole === 'admin' && employees.length === 0 && (
-            <button
-              onClick={onNavigateToUpload}
-              className="btn-primary"
-            >
+          {userRole === "admin" && employees.length === 0 && (
+            <button onClick={onNavigateToUpload} className="btn-primary">
               <Upload size={16} />
               Upload Data Pegawai
             </button>
           )}
         </div>
       ) : (
-        <div className={`employees-container-horizontal ${viewMode}`}>
-          {viewMode === 'grid' ? (
-            <div className="employees-grid-horizontal">
-              {filteredEmployees.map(renderEmployeeCard)}
-            </div>
-          ) : (
-            renderTableView()
-          )}
-        </div>
+        <div className="table-container-minimal">{renderTableView()}</div>
       )}
 
       {/* Detail Modal */}

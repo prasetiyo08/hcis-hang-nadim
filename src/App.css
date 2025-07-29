@@ -475,3 +475,22 @@ a:focus {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ===== APP MAIN CONTENT ===== */
+.app-main-content {
+  margin-top: 70px; /* Space for TopNavigation */
+  min-height: calc(100vh - 70px);
+}
+
+/* Responsive untuk app-main-content */
+@media (max-width: 768px) {
+  .app-main-content {
+    margin-top: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main-content {
+    margin-top: 55px;
+  }
+}
