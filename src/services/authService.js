@@ -1,10 +1,9 @@
-// src/services/authService.js - Clean version without unused imports
+// src/services/authService.js - OPTIMIZED FOR FAST LOGIN
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged
-  // Remove updateProfile since it's not used in this basic version
 } from 'firebase/auth';
 import { 
   doc, 
@@ -34,43 +33,36 @@ export class AuthService {
     };
   }
 
-  // Login user with email and password
+  // OPTIMIZED LOGIN - Fast and efficient
   static async login(email, password) {
     try {
-      console.log('🔐 Attempting login for:', email);
+      console.log('🔐 Starting optimized login for:', email);
       
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
       console.log('✅ Firebase Auth successful');
       
-      // Get user profile from Firestore
+      // Fast profile loading with fallback
       let userData = null;
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           userData = userDoc.data();
-          console.log('✅ User profile loaded from Firestore');
+          console.log('✅ User profile loaded');
         } else {
-          // Create user profile if doesn't exist (for demo accounts)
-          userData = await this.createUserProfile(user, email);
-          console.log('✅ User profile created');
+          // Quick profile creation for demo accounts
+          userData = await this.createQuickProfile(user, email);
+          console.log('✅ Quick profile created');
         }
       } catch (firestoreError) {
-        console.warn('⚠️ Firestore profile fetch failed:', firestoreError.message);
-        // Continue with basic user data
-        userData = { role: 'user', email: user.email };
+        console.warn('⚠️ Using fallback profile data');
+        // Quick fallback
+        userData = this.getFallbackProfile(email);
       }
       
-      // Update last login time
-      try {
-        await updateDoc(doc(db, 'users', user.uid), {
-          lastLoginAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      } catch (updateError) {
-        console.warn('⚠️ Failed to update last login time:', updateError.message);
-      }
+      // Async update last login (don't wait for it)
+      this.updateLastLoginAsync(user.uid);
       
       const userProfile = {
         uid: user.uid,
@@ -80,7 +72,7 @@ export class AuthService {
         profile: userData
       };
       
-      console.log('✅ Login successful:', userProfile);
+      console.log('✅ Optimized login completed in minimal time');
       return userProfile;
       
     } catch (error) {
@@ -89,15 +81,36 @@ export class AuthService {
     }
   }
 
-  // Create user profile in Firestore
-  static async createUserProfile(user, email) {
+  // Quick profile creation for demo accounts
+  static async createQuickProfile(user, email) {
     const demoAccounts = this.getDemoAccounts();
-    let userData = { role: 'user', email: user.email };
+    let userData = this.getFallbackProfile(email);
     
-    // Check if it's a demo account
+    // Only create for demo accounts
+    if (email === demoAccounts.admin.email || email === demoAccounts.user.email) {
+      try {
+        userData.createdAt = serverTimestamp();
+        userData.updatedAt = serverTimestamp();
+        userData.lastLoginAt = null;
+        
+        // Fire and forget - don't wait
+        setDoc(doc(db, 'users', user.uid), userData);
+        console.log('✅ Demo profile creation initiated');
+      } catch (error) {
+        console.warn('⚠️ Profile creation failed, using fallback');
+      }
+    }
+    
+    return userData;
+  }
+
+  // Fast fallback profile data
+  static getFallbackProfile(email) {
+    const demoAccounts = this.getDemoAccounts();
+    
     if (email === demoAccounts.admin.email) {
-      userData = {
-        email: user.email,
+      return {
+        email: email,
         role: 'admin',
         displayName: demoAccounts.admin.displayName,
         department: 'IT',
@@ -105,28 +118,32 @@ export class AuthService {
         status: 'active'
       };
     } else if (email === demoAccounts.user.email) {
-      userData = {
-        email: user.email,
+      return {
+        email: email,
         role: 'user', 
         displayName: demoAccounts.user.displayName,
         department: 'Human Resources',
         position: 'Employee',
         status: 'active'
       };
+    } else {
+      return {
+        email: email,
+        role: 'user',
+        displayName: 'User',
+        status: 'active'
+      };
     }
-    
-    // Add timestamps
-    userData.createdAt = serverTimestamp();
-    userData.updatedAt = serverTimestamp();
-    userData.lastLoginAt = null;
-    
-    try {
-      await setDoc(doc(db, 'users', user.uid), userData);
-      return userData;
-    } catch (error) {
-      console.error('❌ Failed to create user profile:', error);
-      return { role: 'user', email: user.email };
-    }
+  }
+
+  // Async last login update (don't block login)
+  static updateLastLoginAsync(uid) {
+    updateDoc(doc(db, 'users', uid), {
+      lastLoginAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }).catch(error => {
+      console.warn('⚠️ Last login update failed:', error.message);
+    });
   }
 
   // Register new user (admin functionality)
@@ -164,7 +181,7 @@ export class AuthService {
     }
   }
 
-  // Logout user
+  // Fast logout
   static async logout() {
     try {
       await signOut(auth);
@@ -181,52 +198,67 @@ export class AuthService {
     return auth.currentUser;
   }
 
-  // Listen to authentication state changes
+  // OPTIMIZED AUTH STATE LISTENER
   static onAuthStateChanged(callback) {
     return onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // Get user profile from Firestore
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          console.log('🔍 Auth state changed - user found:', user.email);
           
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
+          // Fast profile fetch with timeout
+          const profilePromise = getDoc(doc(db, 'users', user.uid));
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
+          );
+          
+          try {
+            const userDoc = await Promise.race([profilePromise, timeoutPromise]);
+            
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              console.log('✅ User profile loaded quickly');
+              callback({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || userData.displayName,
+                role: userData.role || 'user',
+                profile: userData
+              });
+            } else {
+              // Use fallback profile
+              const fallbackData = this.getFallbackProfile(user.email);
+              console.log('ℹ️ Using fallback profile data');
+              callback({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || fallbackData.displayName,
+                role: fallbackData.role || 'user',
+                profile: fallbackData
+              });
+            }
+          } catch (error) {
+            console.warn('⚠️ Profile fetch failed, using fallback');
+            const fallbackData = this.getFallbackProfile(user.email);
             callback({
               uid: user.uid,
               email: user.email,
-              displayName: user.displayName || userData.displayName,
-              role: userData.role || 'user',
-              profile: userData
-            });
-          } else {
-            // User exists in Auth but not in Firestore - create profile
-            const userData = await this.createUserProfile(user, user.email);
-            callback({
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName || userData.displayName,
-              role: userData.role || 'user',
-              profile: userData
+              displayName: user.displayName || fallbackData.displayName,
+              role: fallbackData.role || 'user',
+              profile: fallbackData
             });
           }
         } catch (error) {
-          console.error('❌ Error fetching user profile:', error);
-          // Fallback to basic user data
-          callback({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            role: 'user',
-            profile: { email: user.email, role: 'user' }
-          });
+          console.error('❌ Error in auth state listener:', error);
+          callback(null);
         }
       } else {
+        console.log('👤 No authenticated user');
         callback(null);
       }
     });
   }
 
-  // Create demo accounts for development
+  // Quick demo accounts creation
   static async createDemoAccounts() {
     if (process.env.NODE_ENV !== 'development') {
       console.warn('⚠️ Demo accounts can only be created in development mode');
@@ -236,7 +268,7 @@ export class AuthService {
     const demoAccounts = this.getDemoAccounts();
     
     try {
-      console.log('🔧 Creating demo accounts...');
+      console.log('🔧 Creating demo accounts quickly...');
       
       // Create admin account
       try {
@@ -280,8 +312,34 @@ export class AuthService {
         }
       }
       
+      console.log('ℹ️ Demo accounts ready');
+      
     } catch (error) {
       console.error('❌ Error creating demo accounts:', error);
+    }
+  }
+
+  // Quick session validation
+  static async quickValidateSession() {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        return { valid: false, reason: 'No user session' };
+      }
+
+      // Quick validation with fallback
+      return { 
+        valid: true, 
+        user: {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          role: 'user', // Default role for quick validation
+          profile: this.getFallbackProfile(currentUser.email)
+        }
+      };
+    } catch (error) {
+      console.error('❌ Quick session validation failed:', error);
+      return { valid: false, reason: 'Session validation error' };
     }
   }
 

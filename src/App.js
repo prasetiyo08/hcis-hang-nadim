@@ -1,4 +1,4 @@
-// App.js - FIXED IMPORT PATHS
+// App.js - OPTIMIZED VERSION - No Auto Login, Fast Loading
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -35,7 +35,7 @@ import {
 // Styles
 import "./App.css";
 
-// ===== LOGIN COMPONENT (INLINE UNTUK SEMENTARA) =====
+// ===== LOGIN COMPONENT =====
 const Login = ({
   onLogin,
   loginForm,
@@ -137,22 +137,6 @@ const Login = ({
               transition: 'all 0.3s ease'
             }}>
               Pelajari Lebih Lanjut
-            </button>
-            <button
-              onClick={() => navigate("/dashboard")}
-              style={{
-                background: 'transparent',
-                color: 'white',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                padding: '15px 30px',
-                borderRadius: '12px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              Lihat Dashboard
             </button>
           </div>
         </div>
@@ -328,14 +312,6 @@ const Login = ({
                     background: 'white'
                   }}
                   required
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#2563eb';
-                    e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#e5e7eb';
-                    e.target.style.boxShadow = 'none';
-                  }}
                 />
               </div>
             </div>
@@ -384,14 +360,6 @@ const Login = ({
                     background: 'white'
                   }}
                   required
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#2563eb';
-                    e.target.style.boxShadow = '0 0 0 4px rgba(37, 99, 235, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#e5e7eb';
-                    e.target.style.boxShadow = 'none';
-                  }}
                 />
                 <button
                   type="button"
@@ -465,18 +433,6 @@ const Login = ({
                 boxShadow: loading ? 'none' : '0 4px 15px rgba(37, 99, 235, 0.4)',
                 marginTop: '10px'
               }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 8px 25px rgba(37, 99, 235, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 15px rgba(37, 99, 235, 0.4)';
-                }
-              }}
             >
               {loading ? (
                 <>
@@ -540,20 +496,6 @@ const Login = ({
                   fontWeight: '500',
                   width: '100%'
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#f0f9ff';
-                  e.target.style.borderColor = '#3b82f6';
-                  e.target.style.color = '#1e40af';
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'white';
-                  e.target.style.borderColor = '#e5e7eb';
-                  e.target.style.color = '#374151';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }}
               >
                 <Shield size={16} />
                 Admin: admin@hangnadim.com / admin123
@@ -576,20 +518,6 @@ const Login = ({
                   color: '#374151',
                   fontWeight: '500',
                   width: '100%'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#f0f9ff';
-                  e.target.style.borderColor = '#3b82f6';
-                  e.target.style.color = '#1e40af';
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'white';
-                  e.target.style.borderColor = '#e5e7eb';
-                  e.target.style.color = '#374151';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
                 }}
               >
                 <UserCheck size={16} />
@@ -848,17 +776,27 @@ const App = () => {
   const userRole = user?.role || "user";
   const userEmail = user?.email || "";
 
-  // Initialize Firebase Auth
+  // OPTIMIZED: Simple Firebase Auth initialization
   useEffect(() => {
-    console.log("🔄 Setting up Firebase Auth listener...");
+    console.log("🔄 Setting up optimized Firebase Auth listener...");
     
+    let sessionCleared = false;
+
     const unsubscribe = AuthService.onAuthStateChanged((userData) => {
       console.log("🔍 Auth state changed:", userData);
       
-      if (userData) {
+      if (userData && !sessionCleared) {
+        // First time detect user - clear session to prevent auto-login
+        console.log("🧹 Clearing persistent session to prevent auto-login");
+        AuthService.logout();
+        sessionCleared = true;
+        setUser(null);
+        setIsAuthenticated(false);
+      } else if (userData && sessionCleared) {
+        // User authenticated after session clear (manual login)
         setUser(userData);
         setIsAuthenticated(true);
-        console.log("✅ User authenticated:", {
+        console.log("✅ Manual login successful:", {
           email: userData.email,
           role: userData.role,
           uid: userData.uid
@@ -875,7 +813,7 @@ const App = () => {
     return unsubscribe;
   }, []);
 
-  // Handle login
+  // OPTIMIZED: Fast login handler
   const handleLogin = async (e) => {
     e.preventDefault();
     console.log("🚀 Login process started");
@@ -892,7 +830,10 @@ const App = () => {
       
       console.log("✅ Login successful:", userData);
       
-      // Firebase Auth listener will handle state updates
+      // Direct authentication without waiting for Firebase listener
+      setUser(userData);
+      setIsAuthenticated(true);
+      
       return true;
       
     } catch (error) {
@@ -912,6 +853,8 @@ const App = () => {
       await AuthService.logout();
       setLoginForm({ email: "", password: "", role: "user" });
       setError("");
+      setUser(null);
+      setIsAuthenticated(false);
       console.log("✅ Logout completed");
     } catch (error) {
       console.error("❌ Logout failed:", error);
@@ -977,17 +920,6 @@ const App = () => {
     </div>
   );
 
-  // Create demo accounts manually when needed
-  const createDemoAccountsManually = async () => {
-    try {
-      console.log("🔄 Creating demo accounts manually...");
-      await AuthService.createDemoAccounts();
-      console.log("✅ Demo accounts created successfully");
-    } catch (error) {
-      console.error("❌ Failed to create demo accounts:", error);
-    }
-  };
-
   console.log("🎯 App render state:", { 
     isAuthenticated, 
     userRole, 
@@ -1010,22 +942,6 @@ const App = () => {
       }}>
         <div className="loading-spinner" style={{ width: '50px', height: '50px' }}></div>
         <p>Initializing HCIS...</p>
-        
-        {/* Manual demo account creation button */}
-        <button 
-          onClick={createDemoAccountsManually}
-          style={{
-            marginTop: '1rem',
-            padding: '0.5rem 1rem',
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer'
-          }}
-        >
-          Create Demo Accounts
-        </button>
       </div>
     );
   }
