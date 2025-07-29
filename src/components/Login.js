@@ -1,4 +1,4 @@
-// src/components/Login/Login.js
+// src/components/Login/Login.js - FINAL VERSION
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -21,6 +21,7 @@ const Login = ({
   setShowPassword,
   fillDemoCredentials,
   error,
+  isAuthenticated = false,
 }) => {
   const navigate = useNavigate();
 
@@ -54,24 +55,49 @@ const Login = ({
           </div>
 
           <div className="login-hero">
-            <h1 className="login-title">
-              Human Capital
-              <br />
-              Information System
-            </h1>
-            <p className="login-subtitle">
-              HCIS Hang Nadim Airport - Sistem informasi untuk mengelola data pegawai dan operasional bandara
-            </p>
+            <div className="login-title-container">
+              <h1 className="login-title">
+                <span className="title-line-1">Human Capital</span>
+                <span className="title-line-2">Information System</span>
+              </h1>
+              <div className="login-subtitle-container">
+                <p className="login-subtitle-main">
+                  HCIS Hang Nadim Airport
+                </p>
+                <p className="login-subtitle-desc">
+                  Sistem informasi terintegrasi untuk mengelola data pegawai dan operasional bandara internasional
+                </p>
+              </div>
+            </div>
             
             <div className="login-buttons">
-              <button className="btn-primary">
+              <button 
+                className="btn-primary"
+                onClick={() => {
+                  // Add smooth scroll effect to form
+                  const formContainer = document.querySelector('.login-form-container');
+                  if (formContainer) {
+                    formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }}
+              >
                 Pelajari Lebih Lanjut
               </button>
               <button
                 className="btn-secondary"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    navigate("/dashboard");
+                  } else {
+                    // Focus on email input
+                    const emailInput = document.querySelector('input[name="email"]');
+                    if (emailInput) {
+                      emailInput.focus();
+                    }
+                  }
+                }}
               >
-                Lihat Dashboard
+                {isAuthenticated ? "Lihat Dashboard" : "Langsung Masuk"}
               </button>
             </div>
           </div>
