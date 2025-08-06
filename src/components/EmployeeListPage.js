@@ -1,4 +1,4 @@
-// src/components/EmployeeListPage.js - Horizontal Layout Version
+// src/components/EmployeeListPage.js - SIMPLE FIX - Keep Original Structure
 import React, { useState, useEffect } from "react";
 import {
   collection,
@@ -223,18 +223,19 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
     </div>
   );
 
+  // SIMPLE TABLE RENDER - Keep original structure but add alignment classes
   const renderTableView = () => (
     <div className="table-container-horizontal">
-      <table className="employees-table-horizontal">
+      <table className="employees-table-horizontal employees-table-fixed">
         <thead>
           <tr>
-            <th>Avatar</th>
-            <th>Nama Pegawai</th>
-            <th>Posisi</th>
-            <th>Departemen</th>
-            <th>Email</th>
-            <th>Telepon</th>
-            <th>Aksi</th>
+            <th className="col-avatar-width text-center">AVATAR</th>
+            <th className="col-nama-width text-center">NAMA PEGAWAI</th>
+            <th className="col-posisi-width text-center">POSISI</th>
+            <th className="col-departemen-width text-center">DEPARTEMEN</th>
+            <th className="col-email-width text-center">EMAIL</th>
+            <th className="col-telepon-width text-center">TELEPON</th>
+            <th className="col-aksi-width text-center">AKSI</th>
           </tr>
         </thead>
         <tbody>
@@ -244,22 +245,22 @@ const EmployeeListPage = ({ userRole, userEmail, onNavigateToUpload }) => {
               onClick={() => handleViewDetail(employee)}
               className="table-row-clickable"
             >
-              <td>
+              <td className="col-avatar-width text-center">
                 <div className="table-employee-avatar">
                   {getInitials(employee.fullName)}
                 </div>
               </td>
-              <td>
+              <td className="col-nama-width text-left">
                 <div className="table-employee-info">
                   <strong>{capitalizeWords(employee.fullName)}</strong>
                   <small>{employee.nik || employee.id}</small>
                 </div>
               </td>
-              <td>{capitalizeWords(employee.position)}</td>
-              <td>{capitalizeWords(employee.department)}</td>
-              <td>{employee.email}</td>
-              <td>{employee.phone || "-"}</td>
-              <td>
+              <td className="col-posisi-width text-center">{capitalizeWords(employee.position)}</td>
+              <td className="col-departemen-width text-center">{capitalizeWords(employee.department)}</td>
+              <td className="col-email-width text-left">{employee.email}</td>
+              <td className="col-telepon-width text-center">{employee.phone || "-"}</td>
+              <td className="col-aksi-width text-center">
                 <div
                   className="table-actions"
                   onClick={(e) => e.stopPropagation()}
